@@ -31,26 +31,28 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col mx-auto max-w-7xl py-24">
       <h1 className="text-4xl font-bold mb-8">Yahtzee Scorekeeper</h1>
-      <div className="w-full max-w-7xl">
-        <div className="mb-4 flex">
-          <input
-            type="text"
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-            placeholder="Enter player name"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2"
-          />
-          <button
-            onClick={addPlayer}
-            disabled={state.players.length >= 10}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50"
-          >
-            Add Player
-          </button>
-        </div>
-        <div className="mb-4 grid grid-cols-5 gap-4">
+      <div className="w-full">
+        {state.players.length < 10 && (
+          <div className="mb-4 flex">
+            <input
+              type="text"
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+              placeholder="Enter player name"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2"
+            />
+            <button
+              onClick={addPlayer}
+              disabled={state.players.length >= 10}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50"
+            >
+              Add Player ({state.players.length}/10)
+            </button>
+          </div>
+        )}
+        <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-5 sm:grid-cols-2">
           {state.players.map((player) => (
             <div
               key={player.name}
@@ -87,7 +89,7 @@ export default function Home() {
           ))} */}
         </div>
         {state.currentGameId !== null && <Scorecard />}
-        <GameSummary />
+        {state.games.length > 1 && <GameSummary />}
       </div>
     </main>
   );

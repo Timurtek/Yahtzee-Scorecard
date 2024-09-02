@@ -4,7 +4,7 @@ import { useLocalStorage } from '@/app/hooks/useLocalStorage';
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 
 type Score = {
-  [key: string]: number | null;
+  [category: string]: number | null;
 };
 
 type Player = {
@@ -46,11 +46,12 @@ const initialState: GameState = {
 };
 
 function calculateTotalScore(scores: Score): number {
-  return Object.values(scores).reduce((total, score) => {
+  return Object.values(scores).reduce<number>((total, score) => {
     if (score === null) {
       return total;
     }
-    return total ?? 0 + score;
+    // Use a type assertion here if TypeScript is still complaining
+    return total + (score as number);
   }, 0);
 }
 
