@@ -5,10 +5,12 @@
 import GameSummary from '@/components/GameSummary';
 import Scorecard from '@/components/Scorecard';
 import { useGame } from '@/contexts/GameContext';
+import classNames from 'classnames';
 import React, { useState } from 'react';
 
 export default function Home() {
   const { state, dispatch } = useGame();
+  const currentGame = state.games.find((game) => game.id === state.currentGameId);
   const [playerName, setPlayerName] = useState('');
 
   const addPlayer = () => {
@@ -53,10 +55,12 @@ export default function Home() {
           </div>
         )}
         <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-5 sm:grid-cols-2">
-          {state.players.map((player) => (
+          {state.players.map((player, index) => (
             <div
               key={player.name}
-              className="flex justify-between items-center glassy p-4 rounded-lg"
+              className={classNames('flex justify-between items-center glassy p-4 rounded-lg', {
+                'outline outline-2': index === currentGame?.currentPlayerIndex,
+              })}
             >
               <span className="text-white font-bold">{player.name}</span>
               <button
@@ -76,7 +80,22 @@ export default function Home() {
           >
             Start New Game
           </button>
-          {/* {state.games.map((game) => (
+
+          <button
+            onClick={startNewGame}
+            disabled={state.players.length < 2}
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50 mr-2"
+          >
+            Delete Game
+          </button>
+          <button
+            onClick={startNewGame}
+            disabled={state.players.length < 2}
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50 mr-2"
+          >
+            End Game
+          </button>
+          {state.games.map((game) => (
             <button
               key={game.id}
               onClick={() => switchGame(game.id)}
@@ -86,7 +105,7 @@ export default function Home() {
             >
               Game {game.id}
             </button>
-          ))} */}
+          ))}
         </div>
         {state.currentGameId !== null && <Scorecard />}
         {state.games.length > 1 && <GameSummary />}

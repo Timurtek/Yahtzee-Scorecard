@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useGame } from '../contexts/GameContext';
+import classNames from 'classnames';
 
 const upperSectionCategories = [
   { name: 'Aces', description: 'Count and add only Aces' },
@@ -78,7 +79,6 @@ export default function Scorecard() {
 
   return (
     <div className="overflow-x-auto glassy rounded-xl">
-      <h2 className="text-2xl font-bold mb-4">Game {currentGame.id} Scorecard</h2>
       <table className="min-w-full border-collapse">
         <thead>
           <tr>
@@ -91,7 +91,9 @@ export default function Scorecard() {
             {state.players.map((player, index) => (
               <th
                 key={player.name}
-                className={`border border-black/5 px-4 py-2 font-bold sticky top-0 ${index === currentGame.currentPlayerIndex ? 'bg-yellow-200' : ''}`}
+                className={classNames('border border-black/5 px-4 py-2 font-bold sticky top-0', {
+                  'bg-gray-100': index === currentGame.currentPlayerIndex,
+                })}
               >
                 {player.name}
               </th>
@@ -104,11 +106,16 @@ export default function Scorecard() {
             <tr key={category.name}>
               <td className="border border-black/5 px-4 py-2">{category.name}</td>
               <td className="border border-black/5 px-4 py-2">{category.description}</td>
-              {state.players.map((player) => (
-                <td key={player.name} className="border border-black/5 px-4 py-2">
+              {state.players.map((player, index) => (
+                <td
+                  key={player.name}
+                  className={classNames('border border-black/5 px-4 py-2', {
+                    'bg-gray-100': index === currentGame.currentPlayerIndex,
+                  })}
+                >
                   <button
                     onClick={() => handleScore(player.name, category.name)}
-                    className="w-full h-full hover:border-2"
+                    className="w-full h-full hover:outline hover:rounded-sm outline-2 outline-offset-2"
                   >
                     {currentGame.scores[player.name][category.name] ?? '-'}
                   </button>
@@ -121,8 +128,13 @@ export default function Scorecard() {
             <td className="border border-black/5 px-4 py-2 font-bold" colSpan={2}>
               Total Score
             </td>
-            {state.players.map((player) => (
-              <td key={player.name} className="border border-black/5 px-4 py-2 text-center">
+            {state.players.map((player, index) => (
+              <td
+                key={player.name}
+                className={classNames('border border-black/5 px-4 py-2 text-center', {
+                  'bg-gray-100': index === currentGame.currentPlayerIndex,
+                })}
+              >
                 {calculateUpperSectionTotal(player.name)}
               </td>
             ))}
@@ -132,8 +144,13 @@ export default function Scorecard() {
             <td className="border border-black/5 px-4 py-2 font-bold" colSpan={2}>
               Bonus (if total score is 63 or over)
             </td>
-            {state.players.map((player) => (
-              <td key={player.name} className="border border-black/5 px-4 py-2 text-center">
+            {state.players.map((player, index) => (
+              <td
+                key={player.name}
+                className={classNames('border border-black/5 px-4 py-2 text-center', {
+                  'bg-gray-100': index === currentGame.currentPlayerIndex,
+                })}
+              >
                 {calculateBonus(player.name)}
               </td>
             ))}
@@ -143,8 +160,13 @@ export default function Scorecard() {
             <td className="border border-black/5 px-4 py-2 font-bold" colSpan={2}>
               Total of Upper Section
             </td>
-            {state.players.map((player) => (
-              <td key={player.name} className="border border-black/5 px-4 py-2 text-center">
+            {state.players.map((player, index) => (
+              <td
+                key={player.name}
+                className={classNames('border border-black/5 px-4 py-2 text-center', {
+                  'bg-gray-100': index === currentGame.currentPlayerIndex,
+                })}
+              >
                 {calculateUpperSectionTotal(player.name) + calculateBonus(player.name)}
               </td>
             ))}
@@ -155,8 +177,13 @@ export default function Scorecard() {
             <tr key={category.name}>
               <td className="border border-black/5 px-4 py-2">{category.name}</td>
               <td className="border border-black/5 px-4 py-2">{category.description}</td>
-              {state.players.map((player) => (
-                <td key={player.name} className="border border-black/5 px-4 py-2">
+              {state.players.map((player, index) => (
+                <td
+                  key={player.name}
+                  className={classNames('border border-black/5 px-4 py-2', {
+                    'bg-gray-100': index === currentGame.currentPlayerIndex,
+                  })}
+                >
                   <button
                     onClick={() => handleScore(player.name, category.name)}
                     className="w-full h-full"
@@ -171,8 +198,13 @@ export default function Scorecard() {
           <tr>
             <td className="border border-black/5 px-4 py-2">YAHTZEE BONUS</td>
             <td className="border border-black/5 px-4 py-2">Score 100 per ✓</td>
-            {state.players.map((player) => (
-              <td key={player.name} className="border border-black/5 px-4 py-2">
+            {state.players.map((player, index) => (
+              <td
+                key={player.name}
+                className={classNames('border border-black/5 px-4 py-2', {
+                  'bg-gray-100': index === currentGame.currentPlayerIndex,
+                })}
+              >
                 <button
                   onClick={() => handleScore(player.name, 'YAHTZEE BONUS')}
                   className="w-full h-full"
@@ -187,8 +219,13 @@ export default function Scorecard() {
             <td className="border border-black/5 px-4 py-2 font-bold" colSpan={2}>
               Total of Lower Section
             </td>
-            {state.players.map((player) => (
-              <td key={player.name} className="border border-black/5 px-4 py-2 text-center">
+            {state.players.map((player, index) => (
+              <td
+                key={player.name}
+                className={classNames('border border-black/5 px-4 py-2 text-center', {
+                  'bg-gray-100': index === currentGame.currentPlayerIndex,
+                })}
+              >
                 {calculateLowerSectionTotal(player.name)}
               </td>
             ))}
