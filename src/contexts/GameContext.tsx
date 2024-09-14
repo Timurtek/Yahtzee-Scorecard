@@ -3,15 +3,15 @@
 import { useLocalStorage } from '@/app/hooks/useLocalStorage';
 import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 
-type Score = {
+export type Score = {
   [category: string]: number | null;
 };
 
-type Player = {
+export type Player = {
   name: string;
 };
 
-type Game = {
+export type Game = {
   id: number;
   scores: {
     [playerName: string]: Score;
@@ -19,14 +19,14 @@ type Game = {
   currentPlayerIndex: number;
 };
 
-type GameState = {
+export type GameState = {
   players: Player[];
   games: Game[];
   currentGameId: number | null;
   gameSummaries: { [gameId: number]: { [playerName: string]: number } };
 };
 
-type Action =
+export type Action =
   | { type: 'ADD_PLAYER'; name: string }
   | { type: 'REMOVE_PLAYER'; name: string }
   | { type: 'START_NEW_GAME' }
@@ -38,7 +38,7 @@ type Action =
   | { type: 'NEXT_TURN'; gameId: number }
   | { type: 'UPDATE_SCORE'; gameId: number; playerName: string; category: string; value: number };
 
-const initialState: GameState = {
+export const initialState: GameState = {
   players: [],
   games: [],
   currentGameId: null,
@@ -55,7 +55,7 @@ function calculateTotalScore(scores: Score): number {
   }, 0);
 }
 
-function gameReducer(state: GameState, action: Action): GameState {
+export function gameReducer(state: GameState, action: Action): GameState {
   switch (action.type) {
     case 'ADD_PLAYER':
       if (state.players.some((p) => p.name === action.name)) {
@@ -171,7 +171,7 @@ function gameReducer(state: GameState, action: Action): GameState {
   }
 }
 
-const GameContext = createContext<
+export const GameContext = createContext<
   | {
       state: GameState;
       dispatch: React.Dispatch<Action>;

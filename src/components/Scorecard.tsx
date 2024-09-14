@@ -31,8 +31,6 @@ export default function Scorecard() {
     return <div>No active game. Start a new game to see the scorecard.</div>;
   }
   const currentPlayer = state.players[currentGame.currentPlayerIndex];
-
-  console.log('currentPlayer', currentPlayer, currentGame);
   const handleScore = (playerName: string, category: string) => {
     if (playerName !== currentPlayer.name) {
       alert("It's not your turn!");

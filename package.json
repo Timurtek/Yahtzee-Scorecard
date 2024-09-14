@@ -12,7 +12,8 @@
     "prettier:check": "prettier --check .",
     "format": "npm run prettier && npm run lint",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage && istanbul report html"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",

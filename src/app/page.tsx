@@ -27,6 +27,9 @@ export default function Home() {
   const startNewGame = () => {
     dispatch({ type: 'START_NEW_GAME' });
   };
+  const resetAll = () => {
+    dispatch({ type: 'RESET_ALL' });
+  };
 
   const switchGame = (gameId: number) => {
     dispatch({ type: 'SET_CURRENT_GAME', gameId });
@@ -76,24 +79,16 @@ export default function Home() {
           <button
             onClick={startNewGame}
             disabled={state.players.length < 2}
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50 mr-2"
+            className="bg-white hover:bg-gray-100 text-black font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50 mr-2"
           >
             Start New Game
           </button>
-
           <button
-            onClick={startNewGame}
-            disabled={state.players.length < 2}
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50 mr-2"
+            onClick={resetAll}
+            disabled={state.games.length === 0}
+            className="bg-white hover:bg-gray-100 text-black font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50 mr-2"
           >
-            Delete Game
-          </button>
-          <button
-            onClick={startNewGame}
-            disabled={state.players.length < 2}
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50 mr-2"
-          >
-            End Game
+            Reset All
           </button>
           {state.games.map((game) => (
             <button
