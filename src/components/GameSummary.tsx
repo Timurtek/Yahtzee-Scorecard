@@ -42,12 +42,14 @@ export default function GameSummary() {
           </div>
           {state.gameSummaries[game.id] ? (
             <div className="grid grid-cols-5 gap-5">
-              {Object.entries(state.gameSummaries[game.id]).map(([playerName, score]) => (
-                <div key={playerName} className="flex p-2 border rounded-md gap-4">
-                  <p>{playerName}</p>
-                  <p>{score}</p>
-                </div>
-              ))}
+              {Object.entries(state.gameSummaries[game.id])
+                .sort(([, score1], [, score2]) => score2 - score1)
+                .map(([playerName, score]) => (
+                  <div key={playerName} className="flex p-2 border rounded-md gap-4">
+                    <p>{playerName}</p>
+                    <p>{score}</p>
+                  </div>
+                ))}
             </div>
           ) : (
             <p>Game in progress</p>

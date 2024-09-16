@@ -128,4 +128,46 @@ describe('Home component', () => {
     // Adjust based on your actual GameSummary component implementation
     expect(screen.getByTestId('game-summary')).toBeInTheDocument();
   });
+
+  it('adds a player using prompt', () => {
+    (useGame as jest.Mock).mockReturnValue({
+      state: {
+        players: [],
+        games: [],
+        currentGameId: null,
+      },
+      dispatch: mockDispatch,
+    });
+
+    window.prompt = jest.fn().mockReturnValue('Alice');
+
+    render(<Home />);
+
+    const addButton = screen.getByText('Add Player (0/10)');
+    fireEvent.click(addButton);
+
+    expect(window.prompt).toHaveBeenCalledWith('Enter player name:');
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'ADD_PLAYER', name: 'Alice' });
+  });
+
+  it('does not add a player when prompt is cancelled', () => {
+    (useGame as jest.Mock).mockReturnValue({
+      state: {
+        players: [],
+        games: [],
+        currentGameId: null,
+      },
+      dispatch: mockDispatch,
+    });
+
+    window.prompt = jest.fn().mockReturnValue(null);
+
+    render(<Home />);
+
+    const addButton = screen.getByText('Add Player (0/10)');
+    fireEvent.click(addButton);
+
+    expect(window.prompt).toHaveBeenCalledWith('Enter player name:');
+    expect(mockDispatch).not.toHaveBeenCalled();
+  });
 });

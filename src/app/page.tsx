@@ -11,12 +11,14 @@ import React, { useState } from 'react';
 export default function Home() {
   const { state, dispatch } = useGame();
   const currentGame = state.games.find((game) => game.id === state.currentGameId);
-  const [playerName, setPlayerName] = useState('');
 
+  const isGameInProgress = state.currentGameId !== null;
   const addPlayer = () => {
-    if (playerName.trim() && state.players.length < 10) {
-      dispatch({ type: 'ADD_PLAYER', name: playerName.trim() });
-      setPlayerName('');
+    if (state.players.length < 10) {
+      const name = prompt('Enter player name:');
+      if (name && name.trim()) {
+        dispatch({ type: 'ADD_PLAYER', name: name.trim() });
+      }
     }
   };
 
@@ -37,17 +39,10 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col mx-auto max-w-7xl py-24">
-      <h1 className="text-4xl font-bold mb-8">Yahtzee Scorekeeper</h1>
+      <h1 className="text-4xl font-bold mb-8 text-white drop-shadow-lg">Yahtzee Scorekeeper</h1>
       <div className="w-full">
-        {state.players.length < 10 && (
+        {state.players.length < 10 && !isGameInProgress && (
           <div className="mb-4 flex">
-            <input
-              type="text"
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-              placeholder="Enter player name"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2"
-            />
             <button
               onClick={addPlayer}
               disabled={state.players.length >= 10}
@@ -66,12 +61,14 @@ export default function Home() {
               })}
             >
               <span className="text-white font-bold">{player.name}</span>
-              <button
-                onClick={() => removePlayer(player.name)}
-                className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
-              >
-                Remove
-              </button>
+              {!isGameInProgress && (
+                <button
+                  onClick={() => removePlayer(player.name)}
+                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
+                >
+                  Remove
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -79,9 +76,9 @@ export default function Home() {
           <button
             onClick={startNewGame}
             disabled={state.players.length < 2}
-            className="bg-white hover:bg-gray-100 text-black font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50 mr-2"
+            className="bg-green-500 hover:bg-green-400 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50 mr-2"
           >
-            Start New Game
+            Start a New Game ({state.games.length}/10)
           </button>
           <button
             onClick={resetAll}

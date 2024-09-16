@@ -17,6 +17,7 @@ export type Game = {
     [playerName: string]: Score;
   };
   currentPlayerIndex: number;
+  currentRound: number;
 };
 
 export type GameState = {
@@ -36,7 +37,8 @@ export type Action =
   | { type: 'DELETE_GAME'; gameId: number }
   | { type: 'RESET_ALL' }
   | { type: 'NEXT_TURN'; gameId: number }
-  | { type: 'UPDATE_SCORE'; gameId: number; playerName: string; category: string; value: number };
+  | { type: 'UPDATE_SCORE'; gameId: number; playerName: string; category: string; value: number }
+  | { type: 'NEXT_ROUND'; gameId: number };
 
 export const initialState: GameState = {
   players: [],
@@ -76,11 +78,21 @@ export function gameReducer(state: GameState, action: Action): GameState {
         id: newGameId,
         scores: Object.fromEntries(state.players.map((p) => [p.name, {}])),
         currentPlayerIndex: 0,
+        currentRound: 1,
       };
       return {
         ...state,
         games: [...state.games, newGame],
         currentGameId: newGameId,
+      };
+    case 'NEXT_ROUND':
+      return {
+        ...state,
+        games: state.games.map((game) =>
+          game.id === action.gameId
+            ? { ...game, currentRound: Math.min(game.currentRound + 1, 10) }
+            : game
+        ),
       };
     case 'UPDATE_SCORE':
       return {
