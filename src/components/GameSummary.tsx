@@ -31,7 +31,10 @@ export default function GameSummary() {
           const topScore = sortedEntries[0]?.[1] ?? -Infinity;
 
           return (
-            <div key={game.id} className="glass animate-fade-in flex flex-col gap-3 rounded-2xl p-5">
+            <div
+              key={game.id}
+              className="glass animate-fade-in flex flex-col gap-3 rounded-2xl p-5"
+            >
               <header className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 font-display text-sm font-bold text-white shadow-lg">

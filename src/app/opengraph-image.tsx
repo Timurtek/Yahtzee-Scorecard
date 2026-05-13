@@ -38,7 +38,14 @@ export default async function OpengraphImage() {
             color: '#cbd5e1',
           }}
         >
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+          >
             <rect x="3" y="3" width="18" height="18" rx="4" />
             <circle cx="8.5" cy="8.5" r="1" fill="white" />
             <circle cx="15.5" cy="8.5" r="1" fill="white" />
@@ -64,8 +71,7 @@ export default async function OpengraphImage() {
           >
             <span
               style={{
-                backgroundImage:
-                  'linear-gradient(120deg, #a78bfa 0%, #22d3ee 50%, #34d399 100%)',
+                backgroundImage: 'linear-gradient(120deg, #a78bfa 0%, #22d3ee 50%, #34d399 100%)',
                 backgroundClip: 'text',
                 color: 'transparent',
               }}
