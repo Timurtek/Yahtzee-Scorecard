@@ -72,10 +72,10 @@ export default function Home() {
           </div>
           <h1 className="font-display text-3xl font-bold tracking-tight sm:text-5xl">
             <span className="gradient-text">Yahtzee</span>{' '}
-            <span className="text-white">Scorecard</span>
+            <span className="text-white">Scorekeeper</span>
           </h1>
           <p className="max-w-xl text-sm text-slate-300 sm:text-base">
-            Free online Yahtzee score sheet for up to 10 players. Auto-totals, +35 upper bonus,
+            Free online Yahtzee scorecard for up to 10 players. Auto-totals, +35 upper bonus,
             stacked Yahtzee bonuses. Saves automatically — no signup, no ads.
           </p>
         </div>

@@ -19,7 +19,7 @@ export default function StructuredData() {
     '@type': 'WebApplication',
     '@id': `${SITE_URL}#webapp`,
     name: SITE_NAME,
-    alternateName: ['Yahtzee Scorekeeper', 'Yahtzee Score Sheet'],
+    alternateName: ['Yahtzee Scorecard', 'Yahtzee Score Sheet', 'Yahtzee Score Card'],
     url: SITE_URL,
     description: SITE_DESCRIPTION,
     applicationCategory: 'GameApplication',
@@ -59,7 +59,7 @@ export default function StructuredData() {
       { '@type': 'HowToSupply', name: 'Five dice' },
       { '@type': 'HowToSupply', name: 'A device with a web browser' },
     ],
-    tool: [{ '@type': 'HowToTool', name: 'Yahtzee Scorecard (this site)' }],
+    tool: [{ '@type': 'HowToTool', name: `${SITE_NAME} (this site)` }],
     step: HOW_TO_PLAY_STEPS.map((s, i) => ({
       '@type': 'HowToStep',
       position: i + 1,

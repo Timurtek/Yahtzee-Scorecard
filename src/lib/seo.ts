@@ -5,11 +5,11 @@
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') ||
-  'https://yahtzee-scorecard.app';
+  'https://yahtzeescorekeeper.com';
 
-export const SITE_NAME = 'Yahtzee Scorecard';
+export const SITE_NAME = 'Yahtzee Scorekeeper';
 
-export const SITE_TAGLINE = 'Free Online Yahtzee Score Sheet & Scorekeeper';
+export const SITE_TAGLINE = 'Free Online Yahtzee Scorecard & Score Sheet';
 
 export const SITE_DESCRIPTION =
   'Free online Yahtzee scorecard for up to 10 players. Auto-calculates totals, +35 upper bonus, Yahtzee bonus stacks, and saved automatically. Plays in your browser — no signup, no ads.';
