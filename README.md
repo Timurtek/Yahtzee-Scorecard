@@ -1,76 +1,77 @@
-# Yahtzee Scorekeeper
+# Yahtzee Scorecard
 
-## Overview
+> Free online Yahtzee score sheet for up to 10 players. Auto-totals, +35 upper bonus, stacked Yahtzee bonuses. No signup, no ads.
 
-Yahtzee Scorekeeper is a modern, responsive web application built with Next.js and TypeScript. It provides a digital scorecard for the popular dice game Yahtzee, showcasing advanced front-end development techniques and UI/UX design principles.
+A modern, mobile-first Yahtzee scorekeeper built with Next.js 14 (App Router), TypeScript, and Tailwind CSS. State persists to `localStorage` so unfinished games resume on reload.
 
 ## Features
 
-- **Multi-player Support**: Keep score for multiple players in a single game session.
-- **Dynamic Scorecard**: Automatically calculates scores and updates totals in real-time.
-- **Turn-based System**: Implements a turn system to manage player moves.
-- **Persistent State**: Game state is saved in local storage, allowing games to be resumed.
-- **Responsive Design**: Fully responsive layout that works on desktop and mobile devices.
-- **Accessibility**: Implemented with ARIA attributes and keyboard navigation for improved accessibility.
+- 2–10 players per game
+- Tap-only score entry — no typing, no validation errors
+- Mobile-first single-player view, desktop table view
+- Auto-calculates the +35 upper-section bonus
+- Stacks Yahtzee bonuses (×100 each, up to 3)
+- Edit or clear any cell after the fact
+- Unlimited concurrent games + game history
+- Saves to your browser automatically
+- Dark glass UI with accessible focus states and keyboard nav
 
-## Technologies Used
+## Getting started
 
-- **Next.js**: For server-side rendering and optimal performance.
-- **TypeScript**: For type-safe code and improved developer experience.
-- **React**: Leveraging hooks and context for state management.
-- **Tailwind CSS**: For responsive and customizable styling.
-- **LocalStorage API**: For persisting game state.
+```bash
+npm install
+npm run dev
+```
 
-## Advanced Implementation Details
+Open <http://localhost:3000>.
 
-- **Complex State Management**: Utilizes React Context and useReducer for managing complex game state.
-- **Custom Hooks**: Implements custom hooks for reusable logic, such as local storage interactions.
-- **TypeScript Best Practices**: Demonstrates advanced TypeScript features including discriminated unions and generics.
-- **Performance Optimization**: Implements memoization and optimized re-renders.
-- **Error Handling**: Robust error handling and user feedback mechanisms.
+### Required environment variable for production
 
-## Code Quality & Best Practices
+Set `NEXT_PUBLIC_SITE_URL` to your deployed canonical URL before building. It's used in:
 
-- **ESLint & Prettier**: Enforces code style and catches potential errors.
-- **Unit Testing**: Implements Jest for unit testing critical functions.
-- **Modular Architecture**: Organized codebase with clear separation of concerns.
-- **Responsive Design**: Utilizes Tailwind CSS for a mobile-first, responsive layout.
-- **Accessibility (a11y)**: Focuses on creating an accessible user interface.
+- `<title>` / OG / Twitter / canonical meta tags
+- `sitemap.xml`
+- `robots.txt`
+- `llms.txt`
+- All JSON-LD `@id` and `url` fields
 
-## Future Enhancements
+```bash
+# .env.production (or your hosting provider's dashboard)
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+```
 
-- Implement authentication for user accounts.
-- Add multiplayer functionality with real-time updates.
-- Create a leaderboard and statistics tracking system.
-- Integrate with a backend API for data persistence.
+If unset, it defaults to `https://yahtzee-scorecard.app`.
 
-## Getting Started
+## SEO / AEO / LLM SEO
 
-1. Clone the repository:
+This site ships with comprehensive findability tooling:
 
-   ```
-   git clone https://github.com/yourusername/yahtzee-scorekeeper.git
-   ```
+| Endpoint | Purpose |
+|----------|---------|
+| `/sitemap.xml` | Auto-generated sitemap |
+| `/robots.txt` | Crawler config (explicit allow-list for GPTBot, ClaudeBot, PerplexityBot, etc.) |
+| `/manifest.webmanifest` | PWA manifest |
+| `/opengraph-image` | Dynamic 1200×630 OG image |
+| `/icon` + `/apple-icon` | Dynamic favicon + Apple touch icon |
+| `/llms.txt` | LLM-friendly content surface (proposed standard) |
 
-2. Install dependencies:
+The page renders JSON-LD for `WebSite`, `WebApplication`, `Game`, `HowTo`, `FAQPage`, `BreadcrumbList`, and `Person` schemas.
 
-   ```
-   cd yahtzee-scorekeeper
-   npm install
-   ```
+## Scripts
 
-3. Run the development server:
+| Command | What it does |
+|---------|--------------|
+| `npm run dev` | Start the dev server |
+| `npm run build` | Production build |
+| `npm run start` | Run the production build |
+| `npm test` | Run Jest tests |
+| `npm run lint` | ESLint |
+| `npm run prettier` | Format with Prettier |
 
-   ```
-   npm run dev
-   ```
+## Tech
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+Next.js 14 · React 18 · TypeScript · Tailwind CSS · `react-confetti`
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE).
+MIT. Yahtzee is a trademark of Hasbro. This site is an unofficial fan-made scorekeeper.

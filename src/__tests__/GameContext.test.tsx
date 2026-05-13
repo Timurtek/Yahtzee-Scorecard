@@ -92,6 +92,124 @@ describe('GameContext', () => {
       expect(newState.currentGameId).toBeNull();
     });
 
-    // Add more tests for other actions...
+    it('END_GAME summary includes the +35 upper bonus when upper ≥ 63', () => {
+      const stateWithGame: GameState = {
+        ...initialState,
+        players: [{ name: 'Alice' }],
+        games: [
+          {
+            id: 1,
+            scores: {
+              Alice: {
+                Aces: 3,
+                Twos: 8,
+                Threes: 12,
+                Fours: 16,
+                Fives: 10,
+                Sixes: 18, // upper = 67, gets +35 bonus
+                Chance: 22,
+              },
+            },
+            currentPlayerIndex: 0,
+          },
+        ],
+        currentGameId: 1,
+      };
+      const newState = gameReducer(stateWithGame, { type: 'END_GAME', gameId: 1 });
+      // base = 3+8+12+16+10+18+22 = 89; + 35 upper bonus = 124
+      expect(newState.gameSummaries[1]).toEqual({ Alice: 124 });
+    });
+
+    it('END_GAME summary multiplies YAHTZEE BONUS by 100', () => {
+      const stateWithGame: GameState = {
+        ...initialState,
+        players: [{ name: 'Alice' }],
+        games: [
+          {
+            id: 1,
+            scores: {
+              Alice: { YAHTZEE: 50, 'YAHTZEE BONUS': 2, Chance: 10 },
+            },
+            currentPlayerIndex: 0,
+          },
+        ],
+        currentGameId: 1,
+      };
+      const newState = gameReducer(stateWithGame, { type: 'END_GAME', gameId: 1 });
+      // 50 + 10 + (2 × 100) = 260
+      expect(newState.gameSummaries[1]).toEqual({ Alice: 260 });
+    });
+
+    it('UPDATE_SCORE on an already-set category does NOT advance the turn', () => {
+      const stateWithGame: GameState = {
+        ...initialState,
+        players: [{ name: 'Alice' }, { name: 'Bob' }],
+        games: [
+          {
+            id: 1,
+            scores: { Alice: { Aces: 3 }, Bob: {} },
+            currentPlayerIndex: 1, // Bob's turn
+          },
+        ],
+        currentGameId: 1,
+      };
+      // Edit Alice's already-set Aces score
+      const newState = gameReducer(stateWithGame, {
+        type: 'UPDATE_SCORE',
+        gameId: 1,
+        playerName: 'Alice',
+        category: 'Aces',
+        value: 5,
+      });
+      expect(newState.games[0].scores['Alice']['Aces']).toBe(5);
+      expect(newState.games[0].currentPlayerIndex).toBe(1); // still Bob
+    });
+
+    it('UPDATE_SCORE on YAHTZEE BONUS does not advance turn even on first set', () => {
+      const stateWithGame: GameState = {
+        ...initialState,
+        players: [{ name: 'Alice' }, { name: 'Bob' }],
+        games: [
+          {
+            id: 1,
+            scores: { Alice: {}, Bob: {} },
+            currentPlayerIndex: 0,
+          },
+        ],
+        currentGameId: 1,
+      };
+      const newState = gameReducer(stateWithGame, {
+        type: 'UPDATE_SCORE',
+        gameId: 1,
+        playerName: 'Alice',
+        category: 'YAHTZEE BONUS',
+        value: 1,
+      });
+      expect(newState.games[0].scores['Alice']['YAHTZEE BONUS']).toBe(1);
+      expect(newState.games[0].currentPlayerIndex).toBe(0); // still Alice
+    });
+
+    it('CLEAR_SCORE removes the category and leaves turn order intact', () => {
+      const stateWithGame: GameState = {
+        ...initialState,
+        players: [{ name: 'Alice' }, { name: 'Bob' }],
+        games: [
+          {
+            id: 1,
+            scores: { Alice: { Aces: 4, Twos: 6 }, Bob: {} },
+            currentPlayerIndex: 1,
+          },
+        ],
+        currentGameId: 1,
+      };
+      const newState = gameReducer(stateWithGame, {
+        type: 'CLEAR_SCORE',
+        gameId: 1,
+        playerName: 'Alice',
+        category: 'Aces',
+      });
+      expect(newState.games[0].scores['Alice']).toEqual({ Twos: 6 });
+      expect(newState.games[0].currentPlayerIndex).toBe(1);
+    });
   });
 });

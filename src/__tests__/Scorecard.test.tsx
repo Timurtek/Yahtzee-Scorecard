@@ -11,6 +11,6 @@ describe('Scorecard', () => {
         <Scorecard />
       </GameProvider>
     );
-    expect(screen.getByText(/Yahtzee Scorekeeper/i)).toBeInTheDocument();
+    expect(screen.getByTestId('scorecard-empty')).toBeInTheDocument();
   });
 });

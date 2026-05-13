@@ -15,6 +15,7 @@ describe('Home component', () => {
   const mockDispatch = jest.fn();
 
   beforeEach(() => {
+    mockDispatch.mockClear();
     (useGame as jest.Mock).mockReturnValue({
       state: {
         players: [],
@@ -27,7 +28,9 @@ describe('Home component', () => {
 
   it('renders the title', () => {
     render(<Home />);
-    expect(screen.getByText('Yahtzee Scorekeeper')).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: /yahtzee scorecard/i })
+    ).toBeInTheDocument();
   });
 
   it('allows adding a player', () => {
@@ -71,8 +74,8 @@ describe('Home component', () => {
     expect(screen.getByText('Alice')).toBeInTheDocument();
     expect(screen.getByText('Bob')).toBeInTheDocument();
 
-    const removeButtons = screen.getAllByText('Remove');
-    fireEvent.click(removeButtons[0]);
+    const removeAlice = screen.getByLabelText('Remove Alice');
+    fireEvent.click(removeAlice);
 
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'REMOVE_PLAYER', name: 'Alice' });
   });
@@ -88,7 +91,7 @@ describe('Home component', () => {
     });
 
     render(<Home />);
-    const startButton = screen.getByText('Start New Game');
+    const startButton = screen.getByRole('button', { name: /start (first|another) game/i });
     fireEvent.click(startButton);
 
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'START_NEW_GAME' });
@@ -129,45 +132,18 @@ describe('Home component', () => {
     expect(screen.getByTestId('game-summary')).toBeInTheDocument();
   });
 
-  it('adds a player using prompt', () => {
-    (useGame as jest.Mock).mockReturnValue({
-      state: {
-        players: [],
-        games: [],
-        currentGameId: null,
-      },
-      dispatch: mockDispatch,
-    });
-
-    window.prompt = jest.fn().mockReturnValue('Alice');
-
+  it('does not dispatch when the player name is empty', () => {
     render(<Home />);
-
     const addButton = screen.getByText('Add Player (0/10)');
     fireEvent.click(addButton);
-
-    expect(window.prompt).toHaveBeenCalledWith('Enter player name:');
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'ADD_PLAYER', name: 'Alice' });
+    expect(mockDispatch).not.toHaveBeenCalled();
   });
 
-  it('does not add a player when prompt is cancelled', () => {
-    (useGame as jest.Mock).mockReturnValue({
-      state: {
-        players: [],
-        games: [],
-        currentGameId: null,
-      },
-      dispatch: mockDispatch,
-    });
-
-    window.prompt = jest.fn().mockReturnValue(null);
-
+  it('adds a player when pressing Enter in the input', () => {
     render(<Home />);
-
-    const addButton = screen.getByText('Add Player (0/10)');
-    fireEvent.click(addButton);
-
-    expect(window.prompt).toHaveBeenCalledWith('Enter player name:');
-    expect(mockDispatch).not.toHaveBeenCalled();
+    const input = screen.getByPlaceholderText('Enter player name');
+    fireEvent.change(input, { target: { value: 'Carol' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'ADD_PLAYER', name: 'Carol' });
   });
 });
