@@ -94,7 +94,7 @@ export default function Scorecard() {
   const filledCount = (p: string) =>
     allCategories.filter((c) => currentGame.scores[p]?.[c.name] !== undefined).length;
 
-  const leaderName = useMemo(() => {
+  const leaderName = ((): string | null => {
     let best = -Infinity;
     let leader: string | null = null;
     for (const p of state.players) {
@@ -107,7 +107,7 @@ export default function Scorecard() {
       }
     }
     return best > 0 ? leader : null;
-  }, [state.players, currentGame.scores]);
+  })();
 
   const handleOpen = (playerName: string, category: Category) => {
     const isFilled = currentGame.scores[playerName]?.[category.name] !== undefined;
@@ -218,8 +218,7 @@ export default function Scorecard() {
             </h2>
             {!isGameComplete && currentPlayer && (
               <p className="text-sm text-slate-300">
-                Turn:{' '}
-                <span className="font-semibold text-amber-300">{currentPlayer.name}</span>{' '}
+                Turn: <span className="font-semibold text-amber-300">{currentPlayer.name}</span>{' '}
                 <span className="text-slate-500">· {filledCount(currentPlayer.name)}/13</span>
               </p>
             )}
@@ -275,13 +274,15 @@ export default function Scorecard() {
                         : 'bg-white/15 text-white'
                   }`}
                 >
-                  {isLeader ? <CrownIcon className="h-3.5 w-3.5" /> : p.name.charAt(0).toUpperCase()}
+                  {isLeader ? (
+                    <CrownIcon className="h-3.5 w-3.5" />
+                  ) : (
+                    p.name.charAt(0).toUpperCase()
+                  )}
                 </div>
                 <div className="flex min-w-0 flex-col leading-tight">
                   <span className="truncate text-xs font-semibold text-white">{p.name}</span>
-                  <span className="font-display text-sm font-bold text-slate-200">
-                    {total}
-                  </span>
+                  <span className="font-display text-sm font-bold text-slate-200">{total}</span>
                 </div>
               </button>
             );
@@ -377,7 +378,9 @@ export default function Scorecard() {
         <ScorePicker
           category={editing.category}
           playerName={editing.playerName}
-          existingValue={currentGame.scores[editing.playerName]?.[editing.category.name] ?? undefined}
+          existingValue={
+            currentGame.scores[editing.playerName]?.[editing.category.name] ?? undefined
+          }
           onSave={handleSave}
           onClear={handleClear}
           onClose={() => setEditing(null)}
@@ -471,7 +474,9 @@ function SummaryRow({
     <div className="flex items-center justify-between px-4 py-2.5">
       <span
         className={`${
-          emphasis ? 'font-display text-sm font-bold text-white' : 'text-xs font-semibold text-slate-300'
+          emphasis
+            ? 'font-display text-sm font-bold text-white'
+            : 'text-xs font-semibold text-slate-300'
         }`}
       >
         {label}
@@ -546,7 +551,11 @@ function DesktopTable({
   lowerTotal,
   grandTotal,
 }: {
-  currentGame: { id: number; currentPlayerIndex: number; scores: { [k: string]: { [k: string]: number | null } } };
+  currentGame: {
+    id: number;
+    currentPlayerIndex: number;
+    scores: { [k: string]: { [k: string]: number | null } };
+  };
   players: { name: string }[];
   leaderName: string | null;
   currentPlayerName: string | undefined;
@@ -781,7 +790,9 @@ function SubtotalRow({
       <td
         colSpan={2}
         className={`sticky left-0 z-10 bg-[#161630]/80 px-4 py-2 backdrop-blur ${
-          emphasis ? 'font-display text-sm font-bold text-white' : 'text-xs font-semibold text-slate-300'
+          emphasis
+            ? 'font-display text-sm font-bold text-white'
+            : 'text-xs font-semibold text-slate-300'
         }`}
       >
         {label}

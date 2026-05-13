@@ -4,8 +4,7 @@
  */
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') ||
-  'https://yahtzeescorekeeper.com';
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://yahtzeescorekeeper.com';
 
 export const SITE_NAME = 'Yahtzee Scorekeeper';
 
@@ -128,7 +127,8 @@ export const SCORE_CATEGORIES: ScoreCategory[] = [
   {
     name: 'Yahtzee',
     section: 'Lower',
-    howToScore: 'All five dice the same. Score 50 (or 0). Subsequent Yahtzees add a 100-point bonus.',
+    howToScore:
+      'All five dice the same. Score 50 (or 0). Subsequent Yahtzees add a 100-point bonus.',
     maxScore: 50,
     example: 'Roll 6-6-6-6-6 → score 50.',
   },
@@ -146,7 +146,7 @@ export const SCORE_CATEGORIES: ScoreCategory[] = [
 export const HOW_TO_PLAY_STEPS = [
   {
     name: 'Add players',
-    text: 'Enter each player\'s name and add them to the scorecard. Up to 10 players are supported.',
+    text: "Enter each player's name and add them to the scorecard. Up to 10 players are supported.",
   },
   {
     name: 'Start a new game',

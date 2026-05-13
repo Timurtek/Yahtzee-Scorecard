@@ -48,27 +48,27 @@ If unset, it defaults to `https://yahtzeescorekeeper.com`.
 
 This site ships with comprehensive findability tooling:
 
-| Endpoint | Purpose |
-|----------|---------|
-| `/sitemap.xml` | Auto-generated sitemap |
-| `/robots.txt` | Crawler config (explicit allow-list for GPTBot, ClaudeBot, PerplexityBot, etc.) |
-| `/manifest.webmanifest` | PWA manifest |
-| `/opengraph-image` | Dynamic 1200×630 OG image |
-| `/icon` + `/apple-icon` | Dynamic favicon + Apple touch icon |
-| `/llms.txt` | LLM-friendly content surface (proposed standard) |
+| Endpoint                | Purpose                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| `/sitemap.xml`          | Auto-generated sitemap                                                          |
+| `/robots.txt`           | Crawler config (explicit allow-list for GPTBot, ClaudeBot, PerplexityBot, etc.) |
+| `/manifest.webmanifest` | PWA manifest                                                                    |
+| `/opengraph-image`      | Dynamic 1200×630 OG image                                                       |
+| `/icon` + `/apple-icon` | Dynamic favicon + Apple touch icon                                              |
+| `/llms.txt`             | LLM-friendly content surface (proposed standard)                                |
 
 The page renders JSON-LD for `WebSite`, `WebApplication`, `Game`, `HowTo`, `FAQPage`, `BreadcrumbList`, and `Person` schemas.
 
 ## Scripts
 
-| Command | What it does |
-|---------|--------------|
-| `npm run dev` | Start the dev server |
-| `npm run build` | Production build |
-| `npm run start` | Run the production build |
-| `npm test` | Run Jest tests |
-| `npm run lint` | ESLint |
-| `npm run prettier` | Format with Prettier |
+| Command            | What it does             |
+| ------------------ | ------------------------ |
+| `npm run dev`      | Start the dev server     |
+| `npm run build`    | Production build         |
+| `npm run start`    | Run the production build |
+| `npm test`         | Run Jest tests           |
+| `npm run lint`     | ESLint                   |
+| `npm run prettier` | Format with Prettier     |
 
 ## Tech
 
