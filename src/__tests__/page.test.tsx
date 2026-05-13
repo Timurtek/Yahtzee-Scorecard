@@ -29,7 +29,7 @@ describe('Home component', () => {
   it('renders the title', () => {
     render(<Home />);
     expect(
-      screen.getByRole('heading', { level: 1, name: /yahtzee scorecard/i })
+      screen.getByRole('heading', { level: 1, name: /yahtzee scorekeeper/i })
     ).toBeInTheDocument();
   });
 
