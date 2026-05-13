@@ -201,10 +201,7 @@ export default function ScorePicker({
             </button>
           )}
           <div className="ml-auto flex gap-2">
-            <button
-              onClick={onClose}
-              className="btn btn-ghost focus-visible:ring-white/50"
-            >
+            <button onClick={onClose} className="btn btn-ghost focus-visible:ring-white/50">
               Cancel
             </button>
             <button

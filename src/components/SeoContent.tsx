@@ -24,11 +24,7 @@ export default function SeoContent() {
         </header>
         <ol className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {HOW_TO_PLAY_STEPS.map((step, i) => (
-            <li
-              key={step.name}
-              id={`step-${i + 1}`}
-              className="glass flex gap-4 rounded-2xl p-4"
-            >
+            <li key={step.name} id={`step-${i + 1}`} className="glass flex gap-4 rounded-2xl p-4">
               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 font-display text-sm font-bold text-white">
                 {i + 1}
               </div>

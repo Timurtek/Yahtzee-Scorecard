@@ -138,34 +138,13 @@ export default function StructuredData() {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={jsonLd(website)}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={jsonLd(webApp)}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={jsonLd(game)}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={jsonLd(howTo)}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={jsonLd(faqPage)}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={jsonLd(breadcrumbList)}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={jsonLd(organization)}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(website)} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(webApp)} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(game)} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(howTo)} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(faqPage)} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(breadcrumbList)} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(organization)} />
     </>
   );
 }

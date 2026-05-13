@@ -27,8 +27,7 @@
   body {
     color: var(--text-hi);
     background-color: var(--bg-0);
-    background-image:
-      radial-gradient(at 18% 12%, rgba(139, 92, 246, 0.32) 0px, transparent 45%),
+    background-image: radial-gradient(at 18% 12%, rgba(139, 92, 246, 0.32) 0px, transparent 45%),
       radial-gradient(at 82% 18%, rgba(34, 211, 238, 0.22) 0px, transparent 50%),
       radial-gradient(at 50% 92%, rgba(16, 185, 129, 0.18) 0px, transparent 55%),
       radial-gradient(at 5% 90%, rgba(244, 63, 94, 0.18) 0px, transparent 50%);

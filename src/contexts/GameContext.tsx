@@ -77,8 +77,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
       };
 
     case 'START_NEW_GAME': {
-      const newGameId =
-        state.games.length > 0 ? Math.max(...state.games.map((g) => g.id)) + 1 : 1;
+      const newGameId = state.games.length > 0 ? Math.max(...state.games.map((g) => g.id)) + 1 : 1;
       const newGame: Game = {
         id: newGameId,
         scores: Object.fromEntries(state.players.map((p) => [p.name, {}])),
