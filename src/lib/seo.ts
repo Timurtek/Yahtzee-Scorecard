@@ -18,6 +18,21 @@ export const SITE_SHORT_DESCRIPTION =
 
 export const AUTHOR_NAME = 'Timurtek';
 
+/* ---------------- Freshness signals ---------------- */
+
+/** ISO date the site first launched. */
+export const DATE_PUBLISHED = '2026-05-12';
+/** Build-time stamp so search engines see freshness on each deploy. */
+export const DATE_MODIFIED = new Date().toISOString().slice(0, 10);
+
+/* ---------------- Authoritative entity links (for sameAs) ---------------- */
+
+export const SAME_AS = {
+  wikipedia: 'https://en.wikipedia.org/wiki/Yahtzee',
+  boardGameGeek: 'https://boardgamegeek.com/boardgame/2243/yahtzee',
+  hasbro: 'https://shop.hasbro.com/en-us/product/yahtzee/D6E76170-5056-9047-F5BB-D43D6BB9A1AE',
+} as const;
+
 export const KEYWORDS = [
   'yahtzee scorecard',
   'yahtzee score sheet',
@@ -212,5 +227,96 @@ export const FAQS = [
   {
     q: 'Is this Yahtzee scorecard free?',
     a: 'Yes. It is completely free, with no ads, no signup, and no tracking beyond what you allow your browser. Your scores are saved only on your own device.',
+  },
+];
+
+/* ---------------- What-is definition (for AI snippets & Google One Box) ---------------- */
+
+export const DEFINITION = {
+  short:
+    'Yahtzee is a five-dice game for 2 or more players where you roll three times per turn to score in 13 categories. The highest combined score after all categories are filled wins.',
+  long: [
+    'Yahtzee is a classic dice game invented by Edwin S. Lowe in 1956 and now published by Hasbro. Each turn, a player rolls five standard six-sided dice up to three times, choosing which dice to keep between rolls.',
+    'After the final roll, the player must record a score in one of 13 categories on their scorecard. Each category can only be filled once per game. The categories are split into an upper section (Aces through Sixes — sum of matching dice) and a lower section (combinations like Full House, Yahtzee, and Chance).',
+    'Bonuses reward strong play: reach 63 in the upper section for a +35 bonus, and every Yahtzee (five of a kind) past the first earns a +100 bonus. After all players fill every category, the highest grand total wins.',
+  ],
+};
+
+/* ---------------- Strategy tips (long-tail content + AI citation fuel) ---------------- */
+
+export const STRATEGY_TIPS = [
+  {
+    name: 'Aim for the upper-section bonus first',
+    text: 'The 63-point threshold is roughly three of each number. Prioritise filling Fours, Fives, and Sixes early — they contribute the most to the bonus. Scratching Sixes for 0 makes the bonus much harder to reach.',
+  },
+  {
+    name: 'Use Chance as your safety valve',
+    text: 'Save Chance for a turn where nothing else fits. It accepts any sum of all five dice, so a "bad" roll of 1-3-4-5-6 still scores 19 instead of forcing a zero in a more valuable category.',
+  },
+  {
+    name: 'Score a low Yahtzee in the right place',
+    text: 'A Yahtzee of five 1s only scores 50 in the Yahtzee box but only 5 in Aces. If you already have Yahtzee filled, the Joker rule may let you use a Yahtzee roll as a Full House (25) or Small Straight (30) — far better than a near-zero upper score.',
+  },
+  {
+    name: "Don't panic-scratch your Yahtzee",
+    text: "Zeroing the Yahtzee box early is one of the biggest score killers. If you can't score elsewhere, scratch Ones or Twos first — losing 5 or 10 potential points hurts much less than losing the +50 plus future bonus stacks.",
+  },
+  {
+    name: 'Plan two categories ahead',
+    text: 'On each roll, mentally map your dice to two possible categories. If your first-pick category is risky (e.g. chasing a Large Straight), keep a fallback in mind (Small Straight, Chance) so a failed third roll still produces a usable score.',
+  },
+];
+
+/* ---------------- Glossary (matches search intent for "what is X in Yahtzee") ---------------- */
+
+export const GLOSSARY = [
+  {
+    term: 'Upper section',
+    definition:
+      'The top half of the scorecard. Six categories named Aces, Twos, Threes, Fours, Fives, and Sixes. Each scores the sum of dice showing that face value.',
+  },
+  {
+    term: 'Lower section',
+    definition:
+      'The bottom half of the scorecard. Seven combination categories: 3 of a Kind, 4 of a Kind, Full House, Small Straight, Large Straight, Yahtzee, and Chance.',
+  },
+  {
+    term: 'Upper-section bonus',
+    definition:
+      'A +35 point bonus awarded for scoring 63 or more across the six upper-section categories. Roughly three of each number reaches the threshold.',
+  },
+  {
+    term: 'Yahtzee bonus',
+    definition:
+      'A +100 point bonus awarded each time you roll a Yahtzee (five of a kind) after already scoring 50 in the Yahtzee category. Up to three bonus Yahtzees can be stacked.',
+  },
+  {
+    term: 'Joker rule',
+    definition:
+      'Optional rule covering subsequent Yahtzees. If your Yahtzee category is already filled with 50, a new Yahtzee roll can be used as a Full House (25), Small Straight (30), or Large Straight (40) for full points.',
+  },
+  {
+    term: 'Full House',
+    definition:
+      'A combination of three of one number plus two of another (e.g. three 4s and two 6s). Scores a flat 25 points.',
+  },
+  {
+    term: 'Small Straight',
+    definition: 'Four consecutive dice in any order (e.g. 2-3-4-5). Scores a flat 30 points.',
+  },
+  {
+    term: 'Large Straight',
+    definition:
+      'Five consecutive dice in any order (1-2-3-4-5 or 2-3-4-5-6). Scores a flat 40 points.',
+  },
+  {
+    term: 'Chance',
+    definition:
+      'A catch-all category. Scores the sum of all five dice no matter what they show. Often used as a safety valve for unscorable rolls.',
+  },
+  {
+    term: 'Scratch / zero',
+    definition:
+      "Recording 0 in a category you cannot or do not want to fill normally. Each player has 13 turns and must enter a score on each, even if it's a zero.",
   },
 ];

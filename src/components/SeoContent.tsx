@@ -1,5 +1,12 @@
 import React from 'react';
-import { FAQS, HOW_TO_PLAY_STEPS, SCORE_CATEGORIES } from '@/lib/seo';
+import {
+  DEFINITION,
+  FAQS,
+  GLOSSARY,
+  HOW_TO_PLAY_STEPS,
+  SCORE_CATEGORIES,
+  STRATEGY_TIPS,
+} from '@/lib/seo';
 
 export default function SeoContent() {
   const upper = SCORE_CATEGORIES.filter((c) => c.section === 'Upper');
@@ -7,6 +14,27 @@ export default function SeoContent() {
 
   return (
     <article className="flex flex-col gap-12 pt-6" aria-label="Yahtzee rules and reference">
+      {/* What is Yahtzee — definition lead for AI snippets / Google One Box */}
+      <section id="what-is-yahtzee" aria-labelledby="what-is-yahtzee-heading">
+        <header className="mb-5 flex flex-col gap-2">
+          <span className="chip w-fit">Definition</span>
+          <h2
+            id="what-is-yahtzee-heading"
+            className="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl"
+          >
+            What is Yahtzee?
+          </h2>
+        </header>
+        <div className="glass rounded-2xl p-5">
+          <p className="text-lg font-medium leading-relaxed text-white">{DEFINITION.short}</p>
+          <div className="mt-4 flex flex-col gap-3 text-base text-slate-300">
+            {DEFINITION.long.map((para, i) => (
+              <p key={i}>{para}</p>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* How to play */}
       <section id="how-to-play" aria-labelledby="how-to-play-heading">
         <header className="mb-5 flex flex-col gap-2">
@@ -76,6 +104,64 @@ export default function SeoContent() {
             body="After your first Yahtzee (50 pts), each additional Yahtzee awards +100. You can stack up to three bonus Yahtzees for 300 extra points."
           />
         </div>
+      </section>
+
+      {/* Strategy tips */}
+      <section id="strategy" aria-labelledby="strategy-heading">
+        <header className="mb-5 flex flex-col gap-2">
+          <span className="chip w-fit">Tips</span>
+          <h2
+            id="strategy-heading"
+            className="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl"
+          >
+            Yahtzee strategy tips
+          </h2>
+          <p className="max-w-2xl text-base text-slate-300">
+            Five practical heuristics that consistently outscore a play-by-feel approach.
+          </p>
+        </header>
+        <ol className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {STRATEGY_TIPS.map((tip, i) => (
+            <li key={tip.name} className="glass flex gap-4 rounded-2xl p-4">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 font-display text-sm font-bold text-white">
+                {i + 1}
+              </div>
+              <div className="flex flex-col gap-1">
+                <h3 className="font-display text-base font-bold text-white">{tip.name}</h3>
+                <p className="text-sm text-slate-300">{tip.text}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* Glossary */}
+      <section id="glossary" aria-labelledby="glossary-heading">
+        <header className="mb-5 flex flex-col gap-2">
+          <span className="chip w-fit">Glossary</span>
+          <h2
+            id="glossary-heading"
+            className="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl"
+          >
+            Yahtzee glossary
+          </h2>
+          <p className="max-w-2xl text-base text-slate-300">
+            Quick reference for every term used in Yahtzee scoring.
+          </p>
+        </header>
+        <dl className="glass grid grid-cols-1 gap-0 overflow-hidden rounded-2xl md:grid-cols-2">
+          {GLOSSARY.map((entry, i) => (
+            <div
+              key={entry.term}
+              className={`p-4 ${
+                i % 2 === 0 ? 'md:border-r md:border-white/5' : ''
+              } ${i < GLOSSARY.length - (GLOSSARY.length % 2 === 0 ? 2 : 1) ? 'border-b border-white/5' : ''}`}
+            >
+              <dt className="font-display text-base font-bold text-white">{entry.term}</dt>
+              <dd className="mt-1 text-sm leading-relaxed text-slate-300">{entry.definition}</dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
       {/* FAQ */}

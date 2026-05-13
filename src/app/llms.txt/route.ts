@@ -29,6 +29,7 @@ function buildBody(): string {
   lines.push('');
   lines.push(`- Home: ${SITE_URL}/`);
   lines.push(`- Sitemap: ${SITE_URL}/sitemap.xml`);
+  lines.push(`- Extended LLM surface: ${SITE_URL}/llms-full.txt`);
   lines.push(`- Web App Manifest: ${SITE_URL}/manifest.webmanifest`);
   lines.push('');
 
