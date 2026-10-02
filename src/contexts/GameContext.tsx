@@ -1,11 +1,17 @@
 'use client';
 
-import { useLocalStorage } from '@/app/hooks/useLocalStorage';
-import React, { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  ReactNode,
+  useEffect,
+  useState,
+} from 'react';
+import { canAddYahtzeeBonus, grandTotal, Score, YAHTZEE_BONUS } from '@/lib/scoring';
+import { loadSaved, save } from '@/lib/storage';
 
-export type Score = {
-  [category: string]: number | null;
-};
+export type { Score };
 
 export type Player = {
   name: string;
@@ -13,6 +19,8 @@ export type Player = {
 
 export type Game = {
   id: number;
+  // Roster when the game started; the global player list can change between games.
+  players: Player[];
   scores: {
     [playerName: string]: Score;
   };
@@ -35,7 +43,8 @@ export type Action =
   | { type: 'SET_CURRENT_GAME'; gameId: number }
   | { type: 'END_GAME'; gameId: number }
   | { type: 'DELETE_GAME'; gameId: number }
-  | { type: 'RESET_ALL' };
+  | { type: 'RESET_ALL' }
+  | { type: 'LOAD_STATE'; state: GameState };
 
 export const initialState: GameState = {
   players: [],
@@ -44,24 +53,29 @@ export const initialState: GameState = {
   gameSummaries: {},
 };
 
-const UPPER_CATEGORIES = ['Aces', 'Twos', 'Threes', 'Fours', 'Fives', 'Sixes'];
+export const getCurrentPlayerName = (game: Game) => game.players[game.currentPlayerIndex]?.name;
 
-function calculateTotalScore(scores: Score): number {
-  let upperBase = 0;
-  let total = 0;
-  for (const [category, score] of Object.entries(scores)) {
-    if (score === null || score === undefined) continue;
-    if (category === 'YAHTZEE BONUS') {
-      total += score * 100;
-      continue;
-    }
-    if (UPPER_CATEGORIES.includes(category)) {
-      upperBase += score;
-    }
-    total += score;
+// Saves from before per-game rosters only have player names as score keys.
+export function migrateState(saved: GameState): GameState {
+  return {
+    ...saved,
+    games: saved.games.map((game) => ({
+      ...game,
+      players: game.players ?? Object.keys(game.scores).map((name) => ({ name })),
+    })),
+  };
+}
+
+// Filled boxes can be corrected by anyone; empty boxes and bonuses only on your turn.
+function isScoreAllowed(game: Game, playerName: string, category: string, value: number) {
+  const scores = game.scores[playerName];
+  if (!scores) return false;
+  const isMyTurn = getCurrentPlayerName(game) === playerName;
+  if (category === YAHTZEE_BONUS) {
+    return isMyTurn && canAddYahtzeeBonus(scores) && value === (scores[YAHTZEE_BONUS] ?? 0) + 1;
   }
-  if (upperBase >= 63) total += 35;
-  return total;
+  const isFilled = scores[category] !== undefined && scores[category] !== null;
+  return isFilled || isMyTurn;
 }
 
 export function gameReducer(state: GameState, action: Action): GameState {
@@ -80,6 +94,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
       const newGameId = state.games.length > 0 ? Math.max(...state.games.map((g) => g.id)) + 1 : 1;
       const newGame: Game = {
         id: newGameId,
+        players: state.players,
         scores: Object.fromEntries(state.players.map((p) => [p.name, {}])),
         currentPlayerIndex: 0,
       };
@@ -91,9 +106,12 @@ export function gameReducer(state: GameState, action: Action): GameState {
         ...state,
         games: state.games.map((game) => {
           if (game.id !== action.gameId) return game;
+          if (!isScoreAllowed(game, action.playerName, action.category, action.value)) {
+            return game;
+          }
           const prev = game.scores[action.playerName]?.[action.category];
           const isFirstSet = prev === undefined || prev === null;
-          const shouldAdvance = isFirstSet && action.category !== 'YAHTZEE BONUS';
+          const shouldAdvance = isFirstSet && action.category !== YAHTZEE_BONUS;
           return {
             ...game,
             scores: {
@@ -104,7 +122,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
               },
             },
             currentPlayerIndex: shouldAdvance
-              ? (game.currentPlayerIndex + 1) % state.players.length
+              ? (game.currentPlayerIndex + 1) % game.players.length
               : game.currentPlayerIndex,
           };
         }),
@@ -132,7 +150,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
       if (!endedGame) return state;
       const gameSummary = Object.entries(endedGame.scores).reduce(
         (summary, [playerName, scores]) => {
-          summary[playerName] = calculateTotalScore(scores);
+          summary[playerName] = grandTotal(scores);
           return summary;
         },
         {} as { [playerName: string]: number }
@@ -161,6 +179,9 @@ export function gameReducer(state: GameState, action: Action): GameState {
     case 'RESET_ALL':
       return initialState;
 
+    case 'LOAD_STATE':
+      return migrateState(action.state);
+
     default:
       return state;
   }
@@ -170,19 +191,31 @@ export const GameContext = createContext<
   | {
       state: GameState;
       dispatch: React.Dispatch<Action>;
+      // False until the saved game has been read from localStorage after mount.
+      isHydrated: boolean;
     }
   | undefined
 >(undefined);
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [savedState, setSavedState] = useLocalStorage<GameState | null>('yahtzeeState', null);
-  const [state, dispatch] = useReducer(gameReducer, savedState || initialState);
+  // Start from initialState on server and client so hydration matches, then load the save.
+  const [state, dispatch] = useReducer(gameReducer, initialState);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
-    setSavedState(state);
-  }, [state, setSavedState]);
+    const saved = loadSaved<GameState>();
+    if (saved) dispatch({ type: 'LOAD_STATE', state: saved });
+    setIsHydrated(true);
+  }, []);
 
-  return <GameContext.Provider value={{ state, dispatch }}>{children}</GameContext.Provider>;
+  // Don't save before loading, or the empty initial state would overwrite the save.
+  useEffect(() => {
+    if (isHydrated) save(state);
+  }, [state, isHydrated]);
+
+  return (
+    <GameContext.Provider value={{ state, dispatch, isHydrated }}>{children}</GameContext.Provider>
+  );
 }
 
 export function useGame() {

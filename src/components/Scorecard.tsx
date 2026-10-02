@@ -1,45 +1,23 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useGame } from '../contexts/GameContext';
+import { getCurrentPlayerName, useGame } from '../contexts/GameContext';
 import Confetti from 'react-confetti';
-import ScorePicker, { PickerCategory } from './ScorePicker';
+import ScorePicker from './ScorePicker';
 import Toast from './Toast';
-
-type Category = {
-  name: string;
-  description: string;
-  kind: PickerCategory['kind'];
-};
-
-const upperSectionCategories: Category[] = [
-  { name: 'Aces', description: 'Sum of 1s', kind: { type: 'multiples', step: 1, max: 5 } },
-  { name: 'Twos', description: 'Sum of 2s', kind: { type: 'multiples', step: 2, max: 10 } },
-  { name: 'Threes', description: 'Sum of 3s', kind: { type: 'multiples', step: 3, max: 15 } },
-  { name: 'Fours', description: 'Sum of 4s', kind: { type: 'multiples', step: 4, max: 20 } },
-  { name: 'Fives', description: 'Sum of 5s', kind: { type: 'multiples', step: 5, max: 25 } },
-  { name: 'Sixes', description: 'Sum of 6s', kind: { type: 'multiples', step: 6, max: 30 } },
-];
-
-const lowerSectionCategories: Category[] = [
-  {
-    name: '3 of a Kind',
-    description: 'Sum of all dice',
-    kind: { type: 'sum', min: 5, max: 30 },
-  },
-  {
-    name: '4 of a Kind',
-    description: 'Sum of all dice',
-    kind: { type: 'sum', min: 5, max: 30 },
-  },
-  { name: 'Full House', description: 'Score 25', kind: { type: 'fixed', value: 25 } },
-  { name: 'SM Straight', description: 'Score 30', kind: { type: 'fixed', value: 30 } },
-  { name: 'LG Straight', description: 'Score 40', kind: { type: 'fixed', value: 40 } },
-  { name: 'YAHTZEE', description: 'Score 50', kind: { type: 'fixed', value: 50 } },
-  { name: 'Chance', description: 'Sum of all dice', kind: { type: 'sum', min: 5, max: 30 } },
-];
-
-const allCategories = [...upperSectionCategories, ...lowerSectionCategories];
+import {
+  Category,
+  YAHTZEE_BONUS,
+  canAddYahtzeeBonus,
+  filledCount as countFilled,
+  grandTotal as scoresGrandTotal,
+  isScorecardComplete,
+  lowerSectionCategories,
+  lowerTotal as scoresLowerTotal,
+  upperBonus,
+  upperSectionCategories,
+  upperTotal as scoresUpperTotal,
+} from '@/lib/scoring';
 
 type EditingCell = { playerName: string; category: Category } | null;
 
@@ -53,11 +31,10 @@ export default function Scorecard() {
 
   const isGameComplete = useMemo(() => {
     if (!currentGame) return false;
-    return state.players.every((player) => {
-      const playerScores = currentGame.scores[player.name] || {};
-      return allCategories.every((c) => playerScores[c.name] !== undefined);
-    });
-  }, [currentGame, state.players]);
+    return currentGame.players.every((player) =>
+      isScorecardComplete(currentGame.scores[player.name])
+    );
+  }, [currentGame]);
 
   useEffect(() => {
     setEditing(null);
@@ -75,29 +52,24 @@ export default function Scorecard() {
     );
   }
 
-  const currentPlayer = state.players[currentGame.currentPlayerIndex];
-  const focusPlayer = viewingPlayer ?? currentPlayer?.name ?? state.players[0]?.name;
+  // Use the game's own roster: the global player list may have changed since it started.
+  const players = currentGame.players;
+  const currentPlayerName = getCurrentPlayerName(currentGame);
+  const currentPlayer = players.find((p) => p.name === currentPlayerName);
+  const focusPlayer = viewingPlayer ?? currentPlayer?.name ?? players[0]?.name;
   const isViewingCurrent = focusPlayer === currentPlayer?.name;
 
-  const upperTotal = (p: string) =>
-    upperSectionCategories.reduce((t, c) => t + (currentGame.scores[p]?.[c.name] || 0), 0);
-  const bonus = (p: string) => (upperTotal(p) >= 63 ? 35 : 0);
-  const lowerTotal = (p: string) => {
-    const base = lowerSectionCategories.reduce(
-      (t, c) => t + (currentGame.scores[p]?.[c.name] || 0),
-      0
-    );
-    const bonusCount = currentGame.scores[p]?.['YAHTZEE BONUS'] || 0;
-    return base + bonusCount * 100;
-  };
-  const grandTotal = (p: string) => upperTotal(p) + bonus(p) + lowerTotal(p);
-  const filledCount = (p: string) =>
-    allCategories.filter((c) => currentGame.scores[p]?.[c.name] !== undefined).length;
+  const upperTotal = (p: string) => scoresUpperTotal(currentGame.scores[p]);
+  const bonus = (p: string) => upperBonus(currentGame.scores[p]);
+  const lowerTotal = (p: string) => scoresLowerTotal(currentGame.scores[p]);
+  const grandTotal = (p: string) => scoresGrandTotal(currentGame.scores[p]);
+  const filledCount = (p: string) => countFilled(currentGame.scores[p]);
+  const canBonus = (p: string) => canAddYahtzeeBonus(currentGame.scores[p]);
 
   const leaderName = ((): string | null => {
     let best = -Infinity;
     let leader: string | null = null;
-    for (const p of state.players) {
+    for (const p of players) {
       const g = grandTotal(p.name);
       if (g > best) {
         best = g;
@@ -150,14 +122,13 @@ export default function Scorecard() {
   };
 
   const handleYahtzeeBonus = (playerName: string) => {
-    if (playerName !== currentPlayer?.name) return;
-    const current = currentGame.scores[playerName]?.['YAHTZEE BONUS'] || 0;
-    if (current >= 3) return;
+    if (playerName !== currentPlayer?.name || !canBonus(playerName)) return;
+    const current = currentGame.scores[playerName]?.[YAHTZEE_BONUS] || 0;
     dispatch({
       type: 'UPDATE_SCORE',
       gameId: currentGame.id,
       playerName,
-      category: 'YAHTZEE BONUS',
+      category: YAHTZEE_BONUS,
       value: current + 1,
     });
     setToast(`+100 Bonus · ${playerName}`);
@@ -249,7 +220,7 @@ export default function Scorecard() {
       {/* Scoreboard pill row — visible on all sizes, scrollable on mobile */}
       <div className="no-scrollbar -mx-4 overflow-x-auto px-4">
         <div className="flex gap-2">
-          {state.players.map((p, i) => {
+          {players.map((p, i) => {
             const isCurrent = i === currentGame.currentPlayerIndex;
             const isFocused = focusPlayer === p.name;
             const total = grandTotal(p.name);
@@ -338,8 +309,9 @@ export default function Scorecard() {
           onOpen={handleOpen}
           extraRow={
             <YahtzeeBonusRow
-              count={currentGame.scores[focusPlayer]?.['YAHTZEE BONUS'] || 0}
-              canIncrement={isViewingCurrent}
+              count={currentGame.scores[focusPlayer]?.[YAHTZEE_BONUS] || 0}
+              canIncrement={isViewingCurrent && canBonus(focusPlayer)}
+              needsYahtzee={currentGame.scores[focusPlayer]?.YAHTZEE !== 50}
               onIncrement={() => handleYahtzeeBonus(focusPlayer)}
             />
           }
@@ -363,11 +335,12 @@ export default function Scorecard() {
       {/* DESKTOP: Full table */}
       <DesktopTable
         currentGame={currentGame}
-        players={state.players}
+        players={players}
         leaderName={leaderName}
         currentPlayerName={currentPlayer?.name}
         onOpen={handleOpen}
         onYahtzeeBonus={handleYahtzeeBonus}
+        canBonus={canBonus}
         upperTotal={upperTotal}
         bonus={bonus}
         lowerTotal={lowerTotal}
@@ -495,10 +468,12 @@ function SummaryRow({
 function YahtzeeBonusRow({
   count,
   canIncrement,
+  needsYahtzee,
   onIncrement,
 }: {
   count: number;
   canIncrement: boolean;
+  needsYahtzee: boolean;
   onIncrement: () => void;
 }) {
   return (
@@ -508,7 +483,9 @@ function YahtzeeBonusRow({
           <CrownIcon className="h-4 w-4 flex-shrink-0 text-amber-300" />
           <div className="flex min-w-0 flex-col leading-tight">
             <span className="font-semibold text-white">Yahtzee Bonus</span>
-            <span className="text-xs text-slate-400">100 per ✓ (max 3)</span>
+            <span className="text-xs text-slate-400">
+              {needsYahtzee ? 'Score 50 in YAHTZEE first' : '100 per ✓ (max 3)'}
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -525,7 +502,7 @@ function YahtzeeBonusRow({
           </span>
           <button
             onClick={onIncrement}
-            disabled={!canIncrement || count >= 3}
+            disabled={!canIncrement}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500 text-white shadow transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             aria-label="Add Yahtzee bonus"
           >
@@ -546,6 +523,7 @@ function DesktopTable({
   currentPlayerName,
   onOpen,
   onYahtzeeBonus,
+  canBonus,
   upperTotal,
   bonus,
   lowerTotal,
@@ -561,6 +539,7 @@ function DesktopTable({
   currentPlayerName: string | undefined;
   onOpen: (playerName: string, category: Category) => void;
   onYahtzeeBonus: (playerName: string) => void;
+  canBonus: (p: string) => boolean;
   upperTotal: (p: string) => number;
   bonus: (p: string) => number;
   lowerTotal: (p: string) => number;
@@ -684,7 +663,7 @@ function DesktopTable({
             </td>
             <td className="px-4 py-2 text-xs text-slate-400">100 per ✓ (max 3)</td>
             {players.map((player, index) => {
-              const count = currentGame.scores[player.name]?.['YAHTZEE BONUS'] || 0;
+              const count = currentGame.scores[player.name]?.[YAHTZEE_BONUS] || 0;
               const isCurrent = index === currentGame.currentPlayerIndex;
               const isMyTurn = player.name === currentPlayerName;
               return (
@@ -710,7 +689,12 @@ function DesktopTable({
                     </span>
                     <button
                       onClick={() => onYahtzeeBonus(player.name)}
-                      disabled={!isMyTurn || count >= 3}
+                      disabled={!isMyTurn || !canBonus(player.name)}
+                      title={
+                        currentGame.scores[player.name]?.YAHTZEE !== 50
+                          ? 'Score 50 in the YAHTZEE box first'
+                          : undefined
+                      }
                       aria-label={`Add Yahtzee bonus for ${player.name}`}
                       className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500 text-white shadow transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                     >

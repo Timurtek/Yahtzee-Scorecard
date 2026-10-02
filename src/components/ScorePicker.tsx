@@ -1,20 +1,10 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-
-export type CategoryKind =
-  | { type: 'multiples'; step: number; max: number } // upper: 0..max step
-  | { type: 'fixed'; value: number } // Full House (25), SM Straight (30), LG Straight (40), YAHTZEE (50)
-  | { type: 'sum'; min: number; max: number }; // 3/4 of a Kind, Chance
-
-export type PickerCategory = {
-  name: string;
-  description: string;
-  kind: CategoryKind;
-};
+import { Category } from '@/lib/scoring';
 
 type Props = {
-  category: PickerCategory;
+  category: Category;
   playerName: string;
   existingValue: number | undefined;
   onSave: (value: number) => void;

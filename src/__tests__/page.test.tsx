@@ -5,8 +5,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import Home from '@/app/page';
 import { GameProvider, useGame } from '@/contexts/GameContext';
 
-// Mock the GameContext
+// Mock useGame but keep the module's real helpers (Scorecard imports them).
 jest.mock('@/contexts/GameContext', () => ({
+  ...jest.requireActual('@/contexts/GameContext'),
   useGame: jest.fn(),
   GameProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
@@ -23,7 +24,21 @@ describe('Home component', () => {
         currentGameId: null,
       },
       dispatch: mockDispatch,
+      isHydrated: true,
     });
+  });
+
+  it('renders the title and SEO content, but holds saved-state UI until loaded', () => {
+    (useGame as jest.Mock).mockReturnValue({
+      state: { players: [], games: [], currentGameId: null, gameSummaries: {} },
+      dispatch: mockDispatch,
+      isHydrated: false,
+    });
+
+    render(<Home />);
+
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Yahtzee Scorekeeper');
+    expect(screen.queryByPlaceholderText('Enter player name')).not.toBeInTheDocument();
   });
 
   it('renders the title', () => {
@@ -54,6 +69,7 @@ describe('Home component', () => {
         currentGameId: null,
       },
       dispatch: mockDispatch,
+      isHydrated: true,
     });
 
     render(<Home />);
@@ -68,6 +84,7 @@ describe('Home component', () => {
         currentGameId: null,
       },
       dispatch: mockDispatch,
+      isHydrated: true,
     });
 
     render(<Home />);
@@ -88,6 +105,7 @@ describe('Home component', () => {
         currentGameId: null,
       },
       dispatch: mockDispatch,
+      isHydrated: true,
     });
 
     render(<Home />);
@@ -101,10 +119,18 @@ describe('Home component', () => {
     (useGame as jest.Mock).mockReturnValue({
       state: {
         players: [{ name: 'Alice' }, { name: 'Bob' }],
-        games: [{ id: 1, scores: {}, currentPlayerIndex: 0 }],
+        games: [
+          {
+            id: 1,
+            players: [{ name: 'Alice' }, { name: 'Bob' }],
+            scores: {},
+            currentPlayerIndex: 0,
+          },
+        ],
         currentGameId: 1,
       },
       dispatch: mockDispatch,
+      isHydrated: true,
     });
 
     render(<Home />);
@@ -118,12 +144,13 @@ describe('Home component', () => {
       state: {
         players: [{ name: 'Alice' }, { name: 'Bob' }],
         games: [
-          { id: 1, scores: {} },
-          { id: 2, scores: {} },
+          { id: 1, players: [{ name: 'Alice' }], scores: {}, currentPlayerIndex: 0 },
+          { id: 2, players: [{ name: 'Alice' }], scores: {}, currentPlayerIndex: 0 },
         ],
         currentGameId: 1,
       },
       dispatch: mockDispatch,
+      isHydrated: true,
     });
 
     render(<Home />);
