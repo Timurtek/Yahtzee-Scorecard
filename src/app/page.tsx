@@ -3,7 +3,7 @@
 import GameSummary from '@/components/GameSummary';
 import Scorecard from '@/components/Scorecard';
 import SeoContent from '@/components/SeoContent';
-import { useGame } from '@/contexts/GameContext';
+import { isGameEnded, useGame } from '@/contexts/GameContext';
 import { allCategories, filledCount } from '@/lib/scoring';
 import { AUTHOR_NAME, SITE_NAME } from '@/lib/seo';
 import React, { useEffect, useRef, useState } from 'react';
@@ -29,6 +29,8 @@ export default function Home() {
   }, [state.currentGameId]);
 
   const isGameInProgress = state.currentGameId !== null;
+  // Ended games are final; their results live in the game list, not the switcher.
+  const unfinishedGames = state.games.filter((game) => !isGameEnded(state, game.id));
   const canAddPlayer = state.players.length < 10 && !isGameInProgress;
   const hasGames = state.games.length > 0;
   const showSetup = !isGameInProgress;
@@ -199,13 +201,13 @@ export default function Home() {
       )}
 
       {/* In-game: compact game switcher when multiple games exist */}
-      {isHydrated && isGameInProgress && state.games.length > 1 && (
+      {isHydrated && isGameInProgress && unfinishedGames.length > 1 && (
         <section
           className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0"
           role="tablist"
           aria-label="Switch game"
         >
-          {state.games.map((game) => {
+          {unfinishedGames.map((game) => {
             const isActive = game.id === state.currentGameId;
             const filled = game.players.reduce(
               (acc, p) => acc + filledCount(game.scores[p.name]),

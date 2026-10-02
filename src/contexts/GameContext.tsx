@@ -55,14 +55,24 @@ export const initialState: GameState = {
 
 export const getCurrentPlayerName = (game: Game) => game.players[game.currentPlayerIndex]?.name;
 
-// Saves from before per-game rosters only have player names as score keys.
+// An ended game has a summary; its scores are final and it can't be reopened.
+export const isGameEnded = (state: GameState, gameId: number) => !!state.gameSummaries?.[gameId];
+
+// Older saves may lack per-game rosters (rebuilt from score keys) or have an
+// ended game still selected (cleared, since ended games can't be reopened).
 export function migrateState(saved: GameState): GameState {
+  const gameSummaries = saved.gameSummaries ?? {};
   return {
     ...saved,
+    gameSummaries,
     games: saved.games.map((game) => ({
       ...game,
       players: game.players ?? Object.keys(game.scores).map((name) => ({ name })),
     })),
+    currentGameId:
+      saved.currentGameId !== null && gameSummaries[saved.currentGameId]
+        ? null
+        : saved.currentGameId,
   };
 }
 
@@ -102,6 +112,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
     }
 
     case 'UPDATE_SCORE':
+      if (isGameEnded(state, action.gameId)) return state;
       return {
         ...state,
         games: state.games.map((game) => {
@@ -129,6 +140,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
       };
 
     case 'CLEAR_SCORE':
+      if (isGameEnded(state, action.gameId)) return state;
       return {
         ...state,
         games: state.games.map((game) => {
@@ -143,11 +155,13 @@ export function gameReducer(state: GameState, action: Action): GameState {
       };
 
     case 'SET_CURRENT_GAME':
+      if (isGameEnded(state, action.gameId)) return state;
       return { ...state, currentGameId: action.gameId };
 
     case 'END_GAME': {
       const endedGame = state.games.find((game) => game.id === action.gameId);
-      if (!endedGame) return state;
+      // Ending twice would recalculate (and could change) the final scores.
+      if (!endedGame || isGameEnded(state, action.gameId)) return state;
       const gameSummary = Object.entries(endedGame.scores).reduce(
         (summary, [playerName, scores]) => {
           summary[playerName] = grandTotal(scores);
