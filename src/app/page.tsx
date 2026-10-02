@@ -4,12 +4,13 @@ import GameSummary from '@/components/GameSummary';
 import Scorecard from '@/components/Scorecard';
 import SeoContent from '@/components/SeoContent';
 import { useGame } from '@/contexts/GameContext';
+import { allCategories, filledCount } from '@/lib/scoring';
 import { AUTHOR_NAME, SITE_NAME } from '@/lib/seo';
 import React, { useEffect, useRef, useState } from 'react';
 import Confetti from 'react-confetti';
 
 export default function Home() {
-  const { state, dispatch } = useGame();
+  const { state, dispatch, isHydrated } = useGame();
   const currentGame = state.games.find((game) => game.id === state.currentGameId);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -79,7 +80,7 @@ export default function Home() {
             stacked Yahtzee bonuses. Saves automatically — no signup, no ads.
           </p>
         </div>
-        {(hasGames || state.players.length > 0) && (
+        {isHydrated && (hasGames || state.players.length > 0) && (
           <div className="relative">
             <button
               onClick={() => setMenuOpen((o) => !o)}
@@ -116,7 +117,7 @@ export default function Home() {
       </header>
 
       {/* SETUP MODE: between games or initial */}
-      {showSetup && (
+      {isHydrated && showSetup && (
         <>
           {/* Player intake */}
           <section className="glass animate-fade-in rounded-2xl p-4 sm:p-5">
@@ -198,7 +199,7 @@ export default function Home() {
       )}
 
       {/* In-game: compact game switcher when multiple games exist */}
-      {isGameInProgress && state.games.length > 1 && (
+      {isHydrated && isGameInProgress && state.games.length > 1 && (
         <section
           className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0"
           role="tablist"
@@ -206,11 +207,11 @@ export default function Home() {
         >
           {state.games.map((game) => {
             const isActive = game.id === state.currentGameId;
-            const filled = state.players.reduce((acc, p) => {
-              const scores = game.scores[p.name] || {};
-              return acc + Object.keys(scores).filter((k) => k !== 'YAHTZEE BONUS').length;
-            }, 0);
-            const total = state.players.length * 13;
+            const filled = game.players.reduce(
+              (acc, p) => acc + filledCount(game.scores[p.name]),
+              0
+            );
+            const total = game.players.length * allCategories.length;
             return (
               <button
                 key={game.id}
@@ -233,8 +234,9 @@ export default function Home() {
         </section>
       )}
 
-      {state.currentGameId !== null && <Scorecard />}
-      {state.games.length >= 1 && <GameSummary />}
+      {/* Saved-state UI waits for the post-mount load; header and SEO content render on the server. */}
+      {isHydrated && state.currentGameId !== null && <Scorecard />}
+      {isHydrated && state.games.length >= 1 && <GameSummary />}
 
       <SeoContent />
 

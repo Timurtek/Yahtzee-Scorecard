@@ -1,6 +1,13 @@
 // src/__tests__/GameContext.test.tsx
 
-import { gameReducer, initialState, GameState, Action } from '../contexts/GameContext';
+import {
+  gameReducer,
+  initialState,
+  migrateState,
+  Game,
+  GameState,
+  Action,
+} from '../contexts/GameContext';
 
 describe('GameContext', () => {
   describe('gameReducer', () => {
@@ -52,6 +59,7 @@ describe('GameContext', () => {
         games: [
           {
             id: 1,
+            players: [{ name: 'Alice' }, { name: 'Bob' }],
             scores: { Alice: {}, Bob: {} },
             currentPlayerIndex: 0,
           },
@@ -62,11 +70,11 @@ describe('GameContext', () => {
         type: 'UPDATE_SCORE',
         gameId: 1,
         playerName: 'Alice',
-        category: 'Ones',
+        category: 'Aces',
         value: 3,
       };
       const newState = gameReducer(stateWithGame, action);
-      expect(newState.games[0].scores['Alice']['Ones']).toBe(3);
+      expect(newState.games[0].scores['Alice']['Aces']).toBe(3);
       expect(newState.games[0].currentPlayerIndex).toBe(1);
     });
 
@@ -77,9 +85,10 @@ describe('GameContext', () => {
         games: [
           {
             id: 1,
+            players: [{ name: 'Alice' }, { name: 'Bob' }],
             scores: {
-              Alice: { Ones: 3, Twos: 6 },
-              Bob: { Ones: 2, Twos: 4 },
+              Alice: { Aces: 3, Twos: 6 },
+              Bob: { Aces: 2, Twos: 4 },
             },
             currentPlayerIndex: 0,
           },
@@ -99,6 +108,7 @@ describe('GameContext', () => {
         games: [
           {
             id: 1,
+            players: [{ name: 'Alice' }],
             scores: {
               Alice: {
                 Aces: 3,
@@ -127,6 +137,7 @@ describe('GameContext', () => {
         games: [
           {
             id: 1,
+            players: [{ name: 'Alice' }],
             scores: {
               Alice: { YAHTZEE: 50, 'YAHTZEE BONUS': 2, Chance: 10 },
             },
@@ -147,6 +158,7 @@ describe('GameContext', () => {
         games: [
           {
             id: 1,
+            players: [{ name: 'Alice' }, { name: 'Bob' }],
             scores: { Alice: { Aces: 3 }, Bob: {} },
             currentPlayerIndex: 1, // Bob's turn
           },
@@ -172,7 +184,8 @@ describe('GameContext', () => {
         games: [
           {
             id: 1,
-            scores: { Alice: {}, Bob: {} },
+            players: [{ name: 'Alice' }, { name: 'Bob' }],
+            scores: { Alice: { YAHTZEE: 50 }, Bob: {} },
             currentPlayerIndex: 0,
           },
         ],
@@ -196,6 +209,7 @@ describe('GameContext', () => {
         games: [
           {
             id: 1,
+            players: [{ name: 'Alice' }, { name: 'Bob' }],
             scores: { Alice: { Aces: 4, Twos: 6 }, Bob: {} },
             currentPlayerIndex: 1,
           },
@@ -210,6 +224,111 @@ describe('GameContext', () => {
       });
       expect(newState.games[0].scores['Alice']).toEqual({ Twos: 6 });
       expect(newState.games[0].currentPlayerIndex).toBe(1);
+    });
+  });
+  describe('per-game rosters', () => {
+    it('stores the roster on the game when it starts', () => {
+      const state = gameReducer(
+        { ...initialState, players: [{ name: 'Alice' }, { name: 'Bob' }] },
+        { type: 'START_NEW_GAME' }
+      );
+      expect(state.games[0].players).toEqual([{ name: 'Alice' }, { name: 'Bob' }]);
+    });
+
+    it("rotates turns within the game's roster, not the current player list", () => {
+      const state: GameState = {
+        ...initialState,
+        // Carol joined after game 1 started.
+        players: [{ name: 'Alice' }, { name: 'Bob' }, { name: 'Carol' }],
+        games: [
+          {
+            id: 1,
+            players: [{ name: 'Alice' }, { name: 'Bob' }],
+            scores: { Alice: {}, Bob: {} },
+            currentPlayerIndex: 1,
+          },
+        ],
+        currentGameId: 1,
+      };
+      const next = gameReducer(state, {
+        type: 'UPDATE_SCORE',
+        gameId: 1,
+        playerName: 'Bob',
+        category: 'Aces',
+        value: 2,
+      });
+      expect(next.games[0].currentPlayerIndex).toBe(0);
+    });
+
+    it('rebuilds a missing roster from score keys when loading an older save', () => {
+      const legacy = {
+        ...initialState,
+        games: [{ id: 1, scores: { Alice: {}, Bob: {} }, currentPlayerIndex: 0 }],
+      } as unknown as GameState;
+      expect(migrateState(legacy).games[0].players).toEqual([{ name: 'Alice' }, { name: 'Bob' }]);
+      expect(
+        gameReducer(initialState, { type: 'LOAD_STATE', state: legacy }).games[0].players
+      ).toEqual([{ name: 'Alice' }, { name: 'Bob' }]);
+    });
+  });
+
+  describe('score guards', () => {
+    const game = (overrides: Partial<Game> = {}): GameState => ({
+      ...initialState,
+      players: [{ name: 'Alice' }, { name: 'Bob' }],
+      games: [
+        {
+          id: 1,
+          players: [{ name: 'Alice' }, { name: 'Bob' }],
+          scores: { Alice: {}, Bob: {} },
+          currentPlayerIndex: 0,
+          ...overrides,
+        },
+      ],
+      currentGameId: 1,
+    });
+    const score = (playerName: string, category: string, value: number): Action => ({
+      type: 'UPDATE_SCORE',
+      gameId: 1,
+      playerName,
+      category,
+      value,
+    });
+
+    it("ignores a score in an empty box when it is not that player's turn", () => {
+      const state = game();
+      expect(gameReducer(state, score('Bob', 'Aces', 2))).toEqual(state);
+    });
+
+    it('ignores scores for players who are not in the game', () => {
+      const state = game();
+      expect(gameReducer(state, score('Carol', 'Aces', 2))).toEqual(state);
+    });
+
+    it('still lets anyone correct a filled box', () => {
+      const next = gameReducer(
+        game({ scores: { Alice: {}, Bob: { Aces: 2 } } }),
+        score('Bob', 'Aces', 4)
+      );
+      expect(next.games[0].scores.Bob.Aces).toBe(4);
+    });
+
+    it('refuses a Yahtzee bonus until the YAHTZEE box holds 50', () => {
+      const scratched = game({ scores: { Alice: { YAHTZEE: 0 }, Bob: {} } });
+      expect(gameReducer(scratched, score('Alice', 'YAHTZEE BONUS', 1))).toEqual(scratched);
+    });
+
+    it('caps Yahtzee bonuses at three and only counts up by one', () => {
+      const atCap = game({ scores: { Alice: { YAHTZEE: 50, 'YAHTZEE BONUS': 3 }, Bob: {} } });
+      expect(gameReducer(atCap, score('Alice', 'YAHTZEE BONUS', 4))).toEqual(atCap);
+
+      const fresh = game({ scores: { Alice: { YAHTZEE: 50 }, Bob: {} } });
+      expect(gameReducer(fresh, score('Alice', 'YAHTZEE BONUS', 3))).toEqual(fresh);
+    });
+
+    it("refuses a Yahtzee bonus on another player's turn", () => {
+      const state = game({ scores: { Alice: {}, Bob: { YAHTZEE: 50 } } });
+      expect(gameReducer(state, score('Bob', 'YAHTZEE BONUS', 1))).toEqual(state);
     });
   });
 });
