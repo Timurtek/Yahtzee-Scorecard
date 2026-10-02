@@ -99,4 +99,4 @@ Next.js 14 · React 18 · TypeScript · Tailwind CSS · `react-confetti` · Jest
 
 ## License
 
-MIT. Yahtzee is a trademark of Hasbro. This site is an unofficial fan-made scorekeeper.
+MIT; see [LICENSE](LICENSE). Yahtzee is a trademark of Hasbro. This site is an unofficial fan-made scorekeeper.
