@@ -331,4 +331,74 @@ describe('GameContext', () => {
       expect(gameReducer(state, score('Bob', 'YAHTZEE BONUS', 1))).toEqual(state);
     });
   });
+  describe('ended games', () => {
+    // Game 1 has ended; game 2 is still being played.
+    const state: GameState = {
+      ...initialState,
+      players: [{ name: 'Alice' }, { name: 'Bob' }],
+      games: [
+        {
+          id: 1,
+          players: [{ name: 'Alice' }, { name: 'Bob' }],
+          scores: { Alice: { Aces: 3 }, Bob: { Twos: 4 } },
+          currentPlayerIndex: 0,
+        },
+        {
+          id: 2,
+          players: [{ name: 'Alice' }, { name: 'Bob' }],
+          scores: { Alice: {}, Bob: {} },
+          currentPlayerIndex: 0,
+        },
+      ],
+      currentGameId: 2,
+      gameSummaries: { 1: { Alice: 3, Bob: 4 } },
+    };
+
+    it('ignores score updates and corrections', () => {
+      expect(
+        gameReducer(state, {
+          type: 'UPDATE_SCORE',
+          gameId: 1,
+          playerName: 'Alice',
+          category: 'Aces',
+          value: 5,
+        })
+      ).toBe(state);
+      expect(
+        gameReducer(state, {
+          type: 'UPDATE_SCORE',
+          gameId: 1,
+          playerName: 'Alice',
+          category: 'Chance',
+          value: 20,
+        })
+      ).toBe(state);
+    });
+
+    it('ignores clearing a score', () => {
+      expect(
+        gameReducer(state, { type: 'CLEAR_SCORE', gameId: 1, playerName: 'Bob', category: 'Twos' })
+      ).toBe(state);
+    });
+
+    it('cannot be reopened', () => {
+      expect(gameReducer(state, { type: 'SET_CURRENT_GAME', gameId: 1 })).toBe(state);
+      expect(gameReducer(state, { type: 'SET_CURRENT_GAME', gameId: 2 }).currentGameId).toBe(2);
+    });
+
+    it('keeps its final scores when ended again', () => {
+      expect(gameReducer(state, { type: 'END_GAME', gameId: 1 })).toBe(state);
+    });
+
+    it('can still be deleted', () => {
+      const next = gameReducer(state, { type: 'DELETE_GAME', gameId: 1 });
+      expect(next.games.map((g) => g.id)).toEqual([2]);
+      expect(next.gameSummaries).toEqual({});
+    });
+
+    it('is deselected when an older save still has it open', () => {
+      expect(migrateState({ ...state, currentGameId: 1 }).currentGameId).toBeNull();
+      expect(migrateState(state).currentGameId).toBe(2);
+    });
+  });
 });

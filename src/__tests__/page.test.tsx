@@ -173,4 +173,49 @@ describe('Home component', () => {
     fireEvent.keyDown(input, { key: 'Enter' });
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'ADD_PLAYER', name: 'Carol' });
   });
+  it('lists only unfinished games in the game switcher', () => {
+    const players = [{ name: 'Alice' }, { name: 'Bob' }];
+    const game = (id: number) => ({
+      id,
+      players,
+      scores: { Alice: {}, Bob: {} },
+      currentPlayerIndex: 0,
+    });
+    (useGame as jest.Mock).mockReturnValue({
+      state: {
+        players,
+        games: [game(1), game(2), game(3)],
+        currentGameId: 3,
+        gameSummaries: { 1: { Alice: 0, Bob: 0 } },
+      },
+      dispatch: mockDispatch,
+      isHydrated: true,
+    });
+
+    render(<Home />);
+
+    const tabs = screen.getAllByRole('tab').map((tab) => tab.textContent);
+    expect(tabs).toHaveLength(2);
+    expect(tabs[0]).toMatch(/^Game 2/);
+    expect(tabs[1]).toMatch(/^Game 3/);
+  });
+
+  it('hides the switcher when only one game is unfinished', () => {
+    const players = [{ name: 'Alice' }];
+    const game = (id: number) => ({ id, players, scores: { Alice: {} }, currentPlayerIndex: 0 });
+    (useGame as jest.Mock).mockReturnValue({
+      state: {
+        players,
+        games: [game(1), game(2)],
+        currentGameId: 2,
+        gameSummaries: { 1: { Alice: 0 } },
+      },
+      dispatch: mockDispatch,
+      isHydrated: true,
+    });
+
+    render(<Home />);
+
+    expect(screen.queryByRole('tablist', { name: 'Switch game' })).not.toBeInTheDocument();
+  });
 });
