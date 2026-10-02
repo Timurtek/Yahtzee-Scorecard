@@ -20,6 +20,7 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "classnames": "^2.5.1",
     "next": "14.2.7",
     "react": "^18",
