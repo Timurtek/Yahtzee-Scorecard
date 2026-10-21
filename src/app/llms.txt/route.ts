@@ -22,7 +22,7 @@ function buildBody(): string {
     `${SITE_NAME} is a free, browser-based scorekeeper for the classic dice game Yahtzee. ` +
       'It supports up to 10 players per game, auto-calculates the +35 upper-section bonus, ' +
       'stacks Yahtzee bonuses at 100 points each (max 3), and persists state to localStorage ' +
-      'so unfinished games resume on reload. No signup, no ads, no tracking. Plays on mobile and desktop.'
+      'so unfinished games resume on reload. No signup, no ads, no cookies. Plays on mobile and desktop.'
   );
   lines.push('');
   lines.push('## Canonical URL');

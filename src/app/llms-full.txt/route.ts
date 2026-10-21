@@ -128,7 +128,9 @@ function buildBody(): string {
   lines.push('- Mobile-first responsive layout with single-player focused view');
   lines.push('- Edit or clear any cell after the fact');
   lines.push('- Tracks unlimited concurrent games with full history');
-  lines.push('- Saves to your browser automatically (no signup, no tracking)');
+  lines.push(
+    '- Saves to your browser automatically (no signup, no cookies; anonymous page-view analytics only)'
+  );
   lines.push('- Works offline after first load (PWA-installable)');
   lines.push('- Dark glass UI with keyboard navigation and ARIA labels');
   lines.push('');

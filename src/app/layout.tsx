@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Fredoka, Nunito } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import { GameProvider } from '@/contexts/GameContext';
 import StructuredData from '@/components/StructuredData';
@@ -127,6 +128,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <GameProvider>{children}</GameProvider>
         <StructuredData />
+        <Analytics />
       </body>
     </html>
   );

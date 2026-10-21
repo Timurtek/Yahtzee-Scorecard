@@ -95,7 +95,7 @@ The page renders JSON-LD for `WebSite`, `WebApplication`, `Game`, `HowTo`, `FAQP
 
 ## Tech
 
-Next.js 14 · React 18 · TypeScript · Tailwind CSS · `react-confetti` · Jest + Testing Library
+Next.js 14 · React 18 · TypeScript · Tailwind CSS · `react-confetti` · Vercel Analytics · Jest + Testing Library
 
 ## License
 
