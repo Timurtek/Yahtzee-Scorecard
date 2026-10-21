@@ -2,7 +2,7 @@
 
 > Free online Yahtzee scorecard for up to 10 players. Auto-totals, +35 upper bonus, stacked Yahtzee bonuses. No signup, no ads.
 >
-> Live at <https://yahtzeescorekeeper.com>
+> Live at <https://www.yahtzeescorekeeper.com>
 
 A modern, mobile-first Yahtzee scorekeeper built with Next.js 14 (App Router), TypeScript, and Tailwind CSS. State persists to `localStorage` so unfinished games resume on reload.
 
@@ -45,7 +45,7 @@ Set `NEXT_PUBLIC_SITE_URL` to your deployed canonical URL before building. It's 
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
 ```
 
-If unset, it defaults to `https://yahtzeescorekeeper.com`.
+If unset, it defaults to `https://www.yahtzeescorekeeper.com`, the address the site serves (the apex domain redirects to it).
 
 ## How it works
 
