@@ -1,6 +1,10 @@
+/**
+ * @jest-environment node
+ */
 // src/__tests__/seo.test.tsx
+// Node environment: the llms routes return a web Response, which jsdom lacks.
 
-import { render } from '@testing-library/react';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 // The analytics package ships ESM only; the layout's metadata is all these tests need.
 jest.mock('@vercel/analytics/next', () => ({ Analytics: () => null }));
@@ -8,17 +12,20 @@ jest.mock('@vercel/analytics/next', () => ({ Analytics: () => null }));
 const SERVED = 'https://www.yahtzeescorekeeper.com';
 const APEX = /https?:\/\/yahtzeescorekeeper\.com/;
 
-// Load the SEO surfaces fresh with NEXT_PUBLIC_SITE_URL unset, so the tests
-// check the default the site falls back to.
-function loadSeoModules() {
+// Load the SEO surfaces fresh with NEXT_PUBLIC_SITE_URL set to `envValue`
+// (or unset), so each case sees the address a build with that env would emit.
+function loadSeoModules(envValue: string | undefined) {
   const saved = process.env.NEXT_PUBLIC_SITE_URL;
-  delete process.env.NEXT_PUBLIC_SITE_URL;
+  if (envValue === undefined) delete process.env.NEXT_PUBLIC_SITE_URL;
+  else process.env.NEXT_PUBLIC_SITE_URL = envValue;
   let modules!: {
     seo: typeof import('@/lib/seo');
     layout: typeof import('@/app/layout');
     sitemap: typeof import('@/app/sitemap').default;
     robots: typeof import('@/app/robots').default;
     StructuredData: typeof import('@/components/StructuredData').default;
+    llms: typeof import('@/app/llms.txt/route');
+    llmsFull: typeof import('@/app/llms-full.txt/route');
   };
   jest.isolateModules(() => {
     modules = {
@@ -27,16 +34,22 @@ function loadSeoModules() {
       sitemap: require('@/app/sitemap').default,
       robots: require('@/app/robots').default,
       StructuredData: require('@/components/StructuredData').default,
+      llms: require('@/app/llms.txt/route'),
+      llmsFull: require('@/app/llms-full.txt/route'),
     };
   });
-  if (saved !== undefined) process.env.NEXT_PUBLIC_SITE_URL = saved;
+  if (saved === undefined) delete process.env.NEXT_PUBLIC_SITE_URL;
+  else process.env.NEXT_PUBLIC_SITE_URL = saved;
   return modules;
 }
 
-describe('site address', () => {
-  const { seo, layout, sitemap, robots, StructuredData } = loadSeoModules();
+describe.each([
+  ['NEXT_PUBLIC_SITE_URL unset', undefined],
+  ['NEXT_PUBLIC_SITE_URL set to the apex', 'https://yahtzeescorekeeper.com'],
+])('site address with %s', (_label, envValue) => {
+  const { seo, layout, sitemap, robots, StructuredData, llms, llmsFull } = loadSeoModules(envValue);
 
-  it('defaults to the www address the site serves', () => {
+  it('is the www address the site serves', () => {
     expect(seo.SITE_URL).toBe(SERVED);
   });
 
@@ -55,16 +68,24 @@ describe('site address', () => {
   it('resolves the canonical and og:url to the www address', () => {
     const { metadata } = layout;
     const base = metadata.metadataBase as URL;
+    expect(base.origin).toBe(SERVED);
     expect(new URL(String(metadata.alternates?.canonical), base).href).toBe(`${SERVED}/`);
     expect(new URL(String(metadata.openGraph?.url), base).href).toBe(`${SERVED}/`);
   });
 
   it('uses the www address in every JSON-LD url', () => {
-    const { container } = render(<StructuredData />);
-    const scripts = Array.from(container.querySelectorAll('script[type="application/ld+json"]'));
-    expect(scripts.length).toBeGreaterThan(0);
-    const json = scripts.map((s) => s.innerHTML).join('\n');
-    expect(json).toContain(SERVED);
-    expect(json).not.toMatch(APEX);
+    const html = renderToStaticMarkup(<StructuredData />);
+    expect(html).toContain('application/ld+json');
+    expect(html).toContain(SERVED);
+    expect(html).not.toMatch(APEX);
+  });
+
+  it.each([
+    ['/llms.txt', () => llms.GET()],
+    ['/llms-full.txt', () => llmsFull.GET()],
+  ])('serves %s with only the www address', async (_route, get) => {
+    const body = await get().text();
+    expect(body).toContain(`${SERVED}/`);
+    expect(body).not.toMatch(APEX);
   });
 });

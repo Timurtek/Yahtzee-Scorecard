@@ -1,12 +1,13 @@
 /**
- * Central SEO config. Set NEXT_PUBLIC_SITE_URL on deploy.
+ * Central SEO config.
  * All metadata, JSON-LD, sitemap, robots, and llms.txt pull from here.
- * The default is the www host because that is the address the site serves
+ * SITE_URL is fixed to the www host because that is the address the site serves
  * (the apex redirects to it); a canonical that redirects is a mixed signal.
+ * It is deliberately not read from the environment, so no deploy setting can
+ * put a different host into the canonical.
  */
 
-export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://www.yahtzeescorekeeper.com';
+export const SITE_URL = 'https://www.yahtzeescorekeeper.com';
 
 export const SITE_NAME = 'Yahtzee Scorekeeper';
 
