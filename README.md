@@ -2,7 +2,7 @@
 
 > Free online Yahtzee scorecard for up to 10 players. Auto-totals, +35 upper bonus, stacked Yahtzee bonuses. No signup, no ads.
 >
-> Live at <https://yahtzeescorekeeper.com>
+> Live at <https://www.yahtzeescorekeeper.com>
 
 A modern, mobile-first Yahtzee scorekeeper built with Next.js 14 (App Router), TypeScript, and Tailwind CSS. State persists to `localStorage` so unfinished games resume on reload.
 
@@ -30,9 +30,9 @@ npm run dev
 
 Open <http://localhost:3000>.
 
-### Required environment variable for production
+### Site address
 
-Set `NEXT_PUBLIC_SITE_URL` to your deployed canonical URL before building. It's used in:
+The site's own address is `SITE_URL` in `src/lib/seo.ts`: `https://www.yahtzeescorekeeper.com`, the address the site serves (the apex domain redirects to it). It is a constant, not an environment variable, so no deploy setting can change the canonical. It's used in:
 
 - `<title>` / OG / Twitter / canonical meta tags
 - `sitemap.xml`
@@ -40,12 +40,11 @@ Set `NEXT_PUBLIC_SITE_URL` to your deployed canonical URL before building. It's 
 - `llms.txt` and `llms-full.txt`
 - All JSON-LD `@id` and `url` fields
 
-```bash
-# .env.production (or your hosting provider's dashboard)
-NEXT_PUBLIC_SITE_URL=https://your-domain.com
-```
+To deploy a fork under another domain, change `SITE_URL` and the tests in `src/__tests__/seo.test.tsx`.
 
-If unset, it defaults to `https://yahtzeescorekeeper.com`.
+### Domain redirect (Vercel)
+
+In the Vercel project `yahtzee-scorecard`, **Settings → Domains**: `www.yahtzeescorekeeper.com` is the primary domain with no redirect, and `yahtzeescorekeeper.com` redirects to it with **308 Permanent Redirect** (Edit on that row, choose 308, Save). A 307 tells Google the move may be temporary; a 308 matches the canonical. Check with `curl -I https://yahtzeescorekeeper.com`: it should answer `308` with `location: https://www.yahtzeescorekeeper.com/`. In Search Console, the submitted sitemap is `https://www.yahtzeescorekeeper.com/sitemap.xml`.
 
 ## How it works
 
